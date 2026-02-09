@@ -112,7 +112,7 @@ pub struct Allocation {
     #[serde(rename = "Reversed")]
     pub _reversed: String,
     #[serde(rename = "ResourceGroup")]
-    pub _resource_group: ResourceGroup,
+    pub resource_group: ResourceGroup,
 }
 
 #[derive(Deserialize, Debug)]
@@ -140,35 +140,35 @@ pub struct ResourceGroup {
     #[serde(rename = "TypeOfResource")]
     pub _type_of_resource: String,
     #[serde(rename = "FleetId")]
-    pub _fleet_id: String,
+    pub fleet_id: String,
     #[serde(rename = "ResourceGroupStatus")]
     pub _resource_group_status: String,
     #[serde(rename = "EndOfDayMiles")]
     pub _end_of_day_miles: String,
     #[serde(rename = "Vehicle")]
-    pub _vehicle: Vec<Vehicle>,
+    pub vehicle: Vec<Vehicle>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Vehicle {
     #[serde(rename = "VehicleId")]
-    pub _vehicle_id: String,
+    pub vehicle_id: i64,
     #[serde(rename = "TypeOfVehicle")]
-    pub _type_of_vehicle: String,
+    pub type_of_vehicle: String,
     #[serde(rename = "ResourcePosition")]
     pub _resource_position: i64,
     #[serde(rename = "PlannedResourceGroup")]
     pub _planned_resource_group: String,
     #[serde(rename = "SpecificType")]
-    pub _specific_type: String,
+    pub specific_type: String,
     #[serde(rename = "Length")]
     pub _length: Length,
     #[serde(rename = "Weight")]
     pub _weight: i32,
     #[serde(rename = "Livery")]
-    pub _livery: String,
+    pub livery: String,
     #[serde(rename = "Decor")]
-    pub _decor: String,
+    pub decor: String,
     #[serde(rename = "SpecialCharacteristics")]
     pub _special_characteristics: Option<String>,
     #[serde(rename = "NumberOfSeats")]

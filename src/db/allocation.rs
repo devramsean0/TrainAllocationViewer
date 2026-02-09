@@ -1,11 +1,13 @@
+use log::debug;
+
 pub use crate::db::schema::Allocation;
 
 impl Allocation {
     pub async fn insert(
         pool: &sqlx::sqlite::SqlitePool,
         alloc: Allocation,
-    ) -> Result<Allocation, sqlx::Error> {
-        sqlx::query_as!(
+    ) -> Result<(), sqlx::Error> {
+        let row = sqlx::query_as!(
             Allocation,
             "INSERT INTO allocations (
                 origin_datetime,
@@ -30,6 +32,8 @@ impl Allocation {
             alloc.allocation_dest_location
         )
         .fetch_one(pool)
-        .await
+        .await?;
+        debug!("Inserted Allocation with ID: {:?}", row.id);
+        Ok(())
     }
 }

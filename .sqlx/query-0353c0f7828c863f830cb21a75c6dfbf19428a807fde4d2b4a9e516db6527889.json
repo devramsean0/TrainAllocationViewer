@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO vehicles (\n                id,\n                livery,\n                decor,\n                vehicle_type,\n                specific_type\n            ) VALUES (?1, ?2, ?3, ?4, ?5)\n            ON CONFLICT(id) DO UPDATE SET\n                livery = excluded.livery,\n                decor = excluded.decor,\n                vehicle_type = excluded.vehicle_type,\n                specific_type = excluded.specific_type\n            RETURNING id, livery, decor, vehicle_type, specific_type",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "livery",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "decor",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "vehicle_type",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "specific_type",
+        "ordinal": 4,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0353c0f7828c863f830cb21a75c6dfbf19428a807fde4d2b4a9e516db6527889"
+}

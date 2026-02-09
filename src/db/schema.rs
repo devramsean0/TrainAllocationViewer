@@ -13,3 +13,12 @@ pub struct Allocation {
     pub allocation_dest_datetime: String,
     pub allocation_dest_location: String,
 }
+
+#[derive(Debug, FromRow)]
+pub struct Vehicle {
+    pub id: Option<i64>,
+    pub livery: String,
+    pub decor: String,
+    pub vehicle_type: String,
+    pub specific_type: String,
+}

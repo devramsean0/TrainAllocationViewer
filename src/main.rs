@@ -2,7 +2,7 @@ use log::info;
 use rdkafka::{consumer::Consumer, Message};
 use tokio::signal;
 
-use crate::db::schema::Allocation;
+use crate::db::schema::{Allocation, Vehicle};
 
 mod db;
 mod kafka;
@@ -31,17 +31,29 @@ async fn main() -> anyhow::Result<()> {
                             if parsed.allocation.is_some() {
                                 for allocation in parsed.allocation.unwrap() {
                                     db::allocation::Allocation::insert(&pool, Allocation {
-                                    id: None,
-                                    origin_datetime: allocation.train_origin_date_time,
-                                    origin_location: allocation.train_origin_location.location_primary_code,
-                                    date: allocation.diagram_date,
-                                    dest_location: allocation.train_dest_location.location_primary_code,
-                                    dest_datetime: allocation.train_dest_date_time,
-                                    allocation_origin_datetime: allocation.allocation_origin_date_time,
-                                    allocation_origin_location: allocation.allocation_origin_location.location_primary_code,
-                                    allocation_dest_datetime: allocation.allocation_destination_date_time,
-                                    allocation_dest_location: allocation.allocation_destination_location.location_primary_code
+                                        id: None,
+                                        origin_datetime: allocation.train_origin_date_time,
+                                        origin_location: allocation.train_origin_location.location_primary_code,
+                                        date: allocation.diagram_date,
+                                        dest_location: allocation.train_dest_location.location_primary_code,
+                                        dest_datetime: allocation.train_dest_date_time,
+                                        allocation_origin_datetime: allocation.allocation_origin_date_time,
+                                        allocation_origin_location: allocation.allocation_origin_location.location_primary_code,
+                                        allocation_dest_datetime: allocation.allocation_destination_date_time,
+                                        allocation_dest_location: allocation.allocation_destination_location.location_primary_code
                                     }).await?;
+
+                                    println!("{:#?}", allocation.resource_group);
+
+                                    for vehicle in allocation.resource_group.vehicle {
+                                        db::vehicle::Vehicle::insert(&pool, Vehicle {
+                                            id: Some(vehicle.vehicle_id),
+                                            decor: vehicle.decor,
+                                            livery: vehicle.livery,
+                                            specific_type: vehicle.specific_type,
+                                            vehicle_type: vehicle.type_of_vehicle
+                                        }).await?;
+                                    }
                                 }
                             }
                         }

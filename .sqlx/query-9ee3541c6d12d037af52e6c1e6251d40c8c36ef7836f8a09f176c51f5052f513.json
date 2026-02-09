@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO allocations (\n                origin_datetime,\n                origin_location,\n                date,\n                dest_location,\n                dest_datetime,\n                allocation_origin_datetime,\n                allocation_origin_location,\n                allocation_dest_datetime,\n                allocation_dest_location\n            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)\n            RETURNING id, origin_datetime, origin_location, date, dest_location, dest_datetime, allocation_origin_datetime, allocation_origin_location, allocation_dest_datetime, allocation_dest_location",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "origin_datetime",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "origin_location",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "date",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "dest_location",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "dest_datetime",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "allocation_origin_datetime",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "allocation_origin_location",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "allocation_dest_datetime",
+        "ordinal": 8,
+        "type_info": "Text"
+      },
+      {
+        "name": "allocation_dest_location",
+        "ordinal": 9,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 9
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "9ee3541c6d12d037af52e6c1e6251d40c8c36ef7836f8a09f176c51f5052f513"
+}
