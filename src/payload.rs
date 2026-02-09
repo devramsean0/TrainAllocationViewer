@@ -1,14 +1,19 @@
+use log::error;
 use serde::Deserialize;
 
 pub fn handle_payload(payload: &[u8]) -> anyhow::Result<()> {
     let payload_str = std::str::from_utf8(payload)?;
     // Parse the XML
-    let xml = quick_xml::de::from_str::<PassengerTrainConsistMessage>(payload_str)?;
-    println!("XML: {:#?}", xml);
+    let xml =
+        quick_xml::de::from_str::<PassengerTrainConsistMessage>(payload_str).unwrap_or_else(|e| {
+            // Catch the result fails so we can properly log it
+            error!("Error parsing XML: {e}");
+            return PassengerTrainConsistMessage::default();
+        });
     Ok(())
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 struct PassengerTrainConsistMessage {
     #[serde(rename = "MessageHeader")]
     _message_header: MessageHeader,
@@ -24,13 +29,13 @@ struct PassengerTrainConsistMessage {
     _allocation: Option<Vec<Allocation>>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 struct MessageHeader {
     #[serde(rename = "MessageReference")]
     _message_reference: MessageReference,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 struct MessageReference {
     #[serde(rename = "MessageType")]
     _message_type: i64,
@@ -42,13 +47,13 @@ struct MessageReference {
     _message_date_time: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 struct TrainOperationalIdentification {
     #[serde(rename = "TransportOperationalIdentifiers")]
     _train_operational_identifiers: Vec<TrainOperationalIdentifiers>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 struct TrainOperationalIdentifiers {
     #[serde(rename = "ObjectType")]
     _object_type: String,
@@ -64,7 +69,7 @@ struct TrainOperationalIdentifiers {
     _start_date: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 struct OperationalTrainNumberIdentifier {
     #[serde(rename = "OperationalTrainNumber")]
     _operational_train_number: String,

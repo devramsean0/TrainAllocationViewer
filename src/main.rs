@@ -1,3 +1,4 @@
+use log::info;
 use rdkafka::{consumer::Consumer, Message};
 use tokio::signal;
 
@@ -7,10 +8,11 @@ mod payload;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let kafka = kafka::create_consumer()?;
     kafka.subscribe(&["prod-1033-Passenger-Train-Allocation-and-Consist-1_0"])?;
 
-    println!("Listening for messages…");
+    info!("Listening for messages…");
 
     loop {
         tokio::select! {
