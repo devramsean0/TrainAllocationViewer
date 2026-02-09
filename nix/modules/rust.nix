@@ -8,11 +8,13 @@
   ];
   perSystem = { config, self', pkgs, lib, ... }: {
     rust-project.crates."train-allocation-viewer".crane.args = {
-      buildInputs = lib.optionals pkgs.stdenv.isDarwin (
-        with pkgs.darwin.apple_sdk.frameworks; [
-          IOKit
-        ]
-      );
+      buildInputs = lib.optionals pkgs.stdenv.isDarwin
+        (
+          with pkgs.darwin.apple_sdk.frameworks; [
+            IOKit
+          ]
+        ) ++ [ pkgs.openssl ];
+      nativeBuildInputs = [ pkgs.pkg-config ];
     };
     packages.default = self'.packages.train-allocation-viewer;
   };

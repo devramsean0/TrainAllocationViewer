@@ -11,6 +11,8 @@
         just
         nixd # Nix language server
         bacon
+        openssl
+        pkg-config
       ];
     };
   };
