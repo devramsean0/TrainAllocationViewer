@@ -136,7 +136,7 @@ pub struct LocationSubsidiaryIdentification {
 #[derive(Deserialize, Debug)]
 pub struct ResourceGroup {
     #[serde(rename = "ResourceGroupId")]
-    pub _resource_group_id: String,
+    pub resource_group_id: String,
     #[serde(rename = "TypeOfResource")]
     pub _type_of_resource: String,
     #[serde(rename = "FleetId")]
@@ -158,7 +158,7 @@ pub struct Vehicle {
     #[serde(rename = "ResourcePosition")]
     pub _resource_position: i64,
     #[serde(rename = "PlannedResourceGroup")]
-    pub _planned_resource_group: String,
+    pub _planned_resource_group: Option<String>,
     #[serde(rename = "SpecificType")]
     pub specific_type: String,
     #[serde(rename = "Length")]
@@ -168,7 +168,7 @@ pub struct Vehicle {
     #[serde(rename = "Livery")]
     pub livery: String,
     #[serde(rename = "Decor")]
-    pub decor: String,
+    pub decor: Option<String>,
     #[serde(rename = "SpecialCharacteristics")]
     pub _special_characteristics: Option<String>,
     #[serde(rename = "NumberOfSeats")]

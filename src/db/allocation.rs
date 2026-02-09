@@ -18,9 +18,10 @@ impl Allocation {
                 allocation_origin_datetime,
                 allocation_origin_location,
                 allocation_dest_datetime,
-                allocation_dest_location
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
-            RETURNING id, origin_datetime, origin_location, date, dest_location, dest_datetime, allocation_origin_datetime, allocation_origin_location, allocation_dest_datetime, allocation_dest_location",
+                allocation_dest_location,
+                resource_group_id
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
+            RETURNING id, origin_datetime, origin_location, date, dest_location, dest_datetime, allocation_origin_datetime, allocation_origin_location, allocation_dest_datetime, allocation_dest_location, resource_group_id",
             alloc.origin_datetime,
             alloc.origin_location,
             alloc.date,
@@ -29,7 +30,8 @@ impl Allocation {
             alloc.allocation_origin_datetime,
             alloc.allocation_origin_location,
             alloc.allocation_dest_datetime,
-            alloc.allocation_dest_location
+            alloc.allocation_dest_location,
+            alloc.resource_group_id
         )
         .fetch_one(pool)
         .await?;

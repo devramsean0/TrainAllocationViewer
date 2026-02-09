@@ -2,7 +2,7 @@ use log::info;
 use rdkafka::{consumer::Consumer, Message};
 use tokio::signal;
 
-use crate::db::schema::{Allocation, Vehicle};
+use crate::db::schema::{Allocation, ResourceGroup, Vehicle};
 
 mod db;
 mod kafka;
@@ -30,6 +30,11 @@ async fn main() -> anyhow::Result<()> {
                             let parsed = payload::handle_payload(payload)?;
                             if parsed.allocation.is_some() {
                                 for allocation in parsed.allocation.unwrap() {
+                                    let resource_group = db::resource_group::ResourceGroup::insert(&pool, ResourceGroup {
+                                        id: allocation.resource_group.resource_group_id.clone(),
+                                        fleet: allocation.resource_group.fleet_id
+                                    }).await?;
+
                                     db::allocation::Allocation::insert(&pool, Allocation {
                                         id: None,
                                         origin_datetime: allocation.train_origin_date_time,
@@ -40,10 +45,9 @@ async fn main() -> anyhow::Result<()> {
                                         allocation_origin_datetime: allocation.allocation_origin_date_time,
                                         allocation_origin_location: allocation.allocation_origin_location.location_primary_code,
                                         allocation_dest_datetime: allocation.allocation_destination_date_time,
-                                        allocation_dest_location: allocation.allocation_destination_location.location_primary_code
+                                        allocation_dest_location: allocation.allocation_destination_location.location_primary_code,
+                                        resource_group_id: resource_group.id.clone(),
                                     }).await?;
-
-                                    println!("{:#?}", allocation.resource_group);
 
                                     for vehicle in allocation.resource_group.vehicle {
                                         db::vehicle::Vehicle::insert(&pool, Vehicle {
@@ -51,7 +55,8 @@ async fn main() -> anyhow::Result<()> {
                                             decor: vehicle.decor,
                                             livery: vehicle.livery,
                                             specific_type: vehicle.specific_type,
-                                            vehicle_type: vehicle.type_of_vehicle
+                                            vehicle_type: vehicle.type_of_vehicle,
+                                            resource_group_id: resource_group.id.clone(),
                                         }).await?;
                                     }
                                 }

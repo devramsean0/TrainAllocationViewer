@@ -14,19 +14,22 @@ impl Vehicle {
                 livery,
                 decor,
                 vehicle_type,
-                specific_type
-            ) VALUES (?1, ?2, ?3, ?4, ?5)
+                specific_type,
+                resource_group_id
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6)
             ON CONFLICT(id) DO UPDATE SET
                 livery = excluded.livery,
                 decor = excluded.decor,
                 vehicle_type = excluded.vehicle_type,
-                specific_type = excluded.specific_type
-            RETURNING id, livery, decor, vehicle_type, specific_type",
+                specific_type = excluded.specific_type,
+                resource_group_id = excluded.resource_group_id
+            RETURNING id, livery, decor, vehicle_type, specific_type, resource_group_id",
             vehicle.id,
             vehicle.livery,
             vehicle.decor,
             vehicle.vehicle_type,
-            vehicle.specific_type
+            vehicle.specific_type,
+            vehicle.resource_group_id
         )
         .fetch_one(pool)
         .await?;
