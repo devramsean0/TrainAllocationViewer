@@ -2,6 +2,9 @@ use log::info;
 use rdkafka::{consumer::Consumer, Message};
 use tokio::signal;
 
+use crate::db::schema::Allocation;
+
+mod db;
 mod kafka;
 mod payload;
 
@@ -9,6 +12,9 @@ mod payload;
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+    let pool = sqlx::sqlite::SqlitePool::connect("sqlite:data.db").await?;
+    sqlx::migrate!().run(&pool).await?;
+
     let kafka = kafka::create_consumer()?;
     kafka.subscribe(&["prod-1033-Passenger-Train-Allocation-and-Consist-1_0"])?;
 
@@ -21,7 +27,23 @@ async fn main() -> anyhow::Result<()> {
                     Err(e) => eprintln!("Kafka error: {e}"),
                     Ok(m) => {
                         if let Some(payload) = m.payload() {
-                            payload::handle_payload(payload)?;
+                            let parsed = payload::handle_payload(payload)?;
+                            if parsed.allocation.is_some() {
+                                for allocation in parsed.allocation.unwrap() {
+                                    db::allocation::Allocation::insert(&pool, Allocation {
+                                    id: None,
+                                    origin_datetime: allocation.train_origin_date_time,
+                                    origin_location: allocation.train_origin_location.location_primary_code,
+                                    date: allocation.diagram_date,
+                                    dest_location: allocation.train_dest_location.location_primary_code,
+                                    dest_datetime: allocation.train_dest_date_time,
+                                    allocation_origin_datetime: allocation.allocation_origin_date_time,
+                                    allocation_origin_location: allocation.allocation_origin_location.location_primary_code,
+                                    allocation_dest_datetime: allocation.allocation_destination_date_time,
+                                    allocation_dest_location: allocation.allocation_destination_location.location_primary_code
+                                    }).await?;
+                                }
+                            }
                         }
                     }
                 }

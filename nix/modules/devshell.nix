@@ -13,6 +13,8 @@
         bacon
         openssl
         pkg-config
+        sqlx-cli
+        sqlite
       ];
     };
   };
