@@ -4,9 +4,12 @@ use tokio::signal;
 
 use crate::db::schema::{Allocation, ResourceGroup, Vehicle};
 
+mod corpus;
 mod db;
 mod kafka;
 mod payload;
+mod s3;
+mod utils;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -14,6 +17,8 @@ async fn main() -> anyhow::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let pool = sqlx::sqlite::SqlitePool::connect("sqlite:data.db").await?;
     sqlx::migrate!().run(&pool).await?;
+
+    corpus::update_corpus().await?;
 
     let kafka = kafka::create_consumer()?;
     kafka.subscribe(&["prod-1033-Passenger-Train-Allocation-and-Consist-1_0"])?;
