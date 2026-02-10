@@ -51,23 +51,7 @@ pub async fn update_corpus(pool: &Pool<Sqlite>) -> anyhow::Result<()> {
     let json = serde_json::from_str::<TiplocData>(json_string.as_str())?;
     info!("Corpus Length: {}", json.tiplocdata.len());
 
-    for location in json.tiplocdata {
-        crate::db::location::Location::insert(
-            &pool,
-            Location {
-                id: None,
-                nlc: location.nlc.to_string(),
-                stanox: location.stanox,
-                tiploc: location.tiploc,
-                crs: location.crs,
-                uic: location.uic,
-                nlcdesc: location.nlcdesc,
-                axis: location.axis,
-                nlcdesc16: location.nlcdesc16,
-            },
-        )
-        .await?;
-    }
+    crate::db::location::Location::insert_bulk(&pool, &json.tiplocdata).await?;
     Ok(())
 }
 
