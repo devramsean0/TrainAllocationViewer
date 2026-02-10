@@ -30,3 +30,16 @@ pub struct ResourceGroup {
     pub id: String,
     pub fleet: String,
 }
+
+#[derive(Debug, FromRow)]
+pub struct Location {
+    pub id: Option<i64>,
+    pub nlc: String,
+    pub stanox: Option<String>,
+    pub tiploc: Option<String>,
+    pub crs: Option<String>,
+    pub uic: Option<String>,
+    pub nlcdesc: Option<String>,
+    pub axis: Option<String>,
+    pub nlcdesc16: Option<String>,
+}

@@ -1,10 +1,11 @@
 use flate2::read::GzDecoder;
 use log::{debug, info};
 use rdkafka::message::ToBytes;
+use sqlx::{Pool, Sqlite};
 
 use std::io::Read;
 
-use crate::s3::S3Client;
+use crate::{db::schema::Location, s3::S3Client};
 use futures::stream::TryStreamExt;
 use std::fs;
 
@@ -27,7 +28,7 @@ async fn decide_on_download() -> anyhow::Result<bool> {
         Ok(true)
     }
 }
-pub async fn update_corpus() -> anyhow::Result<()> {
+pub async fn update_corpus(pool: &Pool<Sqlite>) -> anyhow::Result<()> {
     if decide_on_download().await? {
         let client = S3Client::new()?;
         let s3_file_body = client.get("CORPUSExtract.json.gz").await?;
@@ -49,6 +50,24 @@ pub async fn update_corpus() -> anyhow::Result<()> {
 
     let json = serde_json::from_str::<TiplocData>(json_string.as_str())?;
     info!("Corpus Length: {}", json.tiplocdata.len());
+
+    for location in json.tiplocdata {
+        crate::db::location::Location::insert(
+            &pool,
+            Location {
+                id: None,
+                nlc: location.nlc.to_string(),
+                stanox: location.stanox,
+                tiploc: location.tiploc,
+                crs: location.crs,
+                uic: location.uic,
+                nlcdesc: location.nlcdesc,
+                axis: location.axis,
+                nlcdesc16: location.nlcdesc16,
+            },
+        )
+        .await?;
+    }
     Ok(())
 }
 
@@ -61,21 +80,21 @@ struct TiplocData {
 }
 
 #[derive(serde::Deserialize)]
-struct LocationEntry {
+pub struct LocationEntry {
     #[serde(rename = "NLC")]
-    nlc: i64,
+    pub nlc: i64,
     #[serde(rename = "STANOX")]
-    stanox: Option<String>,
+    pub stanox: Option<String>,
     #[serde(rename = "TIPLOC")]
-    tiploc: Option<String>,
+    pub tiploc: Option<String>,
     #[serde(rename = "3ALPHA")]
-    crs: Option<String>,
+    pub crs: Option<String>,
     #[serde(rename = "UIC")]
-    uic: Option<String>,
+    pub uic: Option<String>,
     #[serde(rename = "NLCDESC")]
-    nlcdesc: Option<String>,
+    pub nlcdesc: Option<String>,
     #[serde(rename = "AXIS/ACRES")]
-    axis: Option<String>,
+    pub axis: Option<String>,
     #[serde(rename = "NLCDESC16")]
-    nlcdesc16: Option<String>,
+    pub nlcdesc16: Option<String>,
 }

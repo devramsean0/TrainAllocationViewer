@@ -18,7 +18,7 @@ async fn main() -> anyhow::Result<()> {
     let pool = sqlx::sqlite::SqlitePool::connect("sqlite:data.db").await?;
     sqlx::migrate!().run(&pool).await?;
 
-    corpus::update_corpus().await?;
+    corpus::update_corpus(&pool).await?;
 
     let kafka = kafka::create_consumer()?;
     kafka.subscribe(&["prod-1033-Passenger-Train-Allocation-and-Consist-1_0"])?;
