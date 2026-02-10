@@ -5,7 +5,7 @@ use sqlx::{Pool, Sqlite};
 
 use std::io::Read;
 
-use crate::{db::schema::Location, s3::S3Client};
+use crate::s3::S3Client;
 use futures::stream::TryStreamExt;
 use std::fs;
 

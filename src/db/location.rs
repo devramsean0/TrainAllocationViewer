@@ -4,7 +4,10 @@ use crate::corpus::LocationEntry;
 pub use crate::db::schema::Location;
 
 impl Location {
-    pub async fn insert(pool: &sqlx::sqlite::SqlitePool, loc: Location) -> Result<(), sqlx::Error> {
+    pub async fn _insert(
+        pool: &sqlx::sqlite::SqlitePool,
+        loc: Location,
+    ) -> Result<(), sqlx::Error> {
         let row = sqlx::query_as!(
             Location,
             "INSERT INTO locations (
