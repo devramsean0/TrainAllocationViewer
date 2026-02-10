@@ -1,11 +1,11 @@
 use flate2::read::GzDecoder;
-use log::info;
+use log::{debug, info};
 use rdkafka::message::ToBytes;
 
 use std::io::Read;
 
 use crate::s3::S3Client;
-use futures::stream::{StreamExt, TryStreamExt};
+use futures::stream::TryStreamExt;
 use std::fs;
 
 async fn decide_on_download() -> anyhow::Result<bool> {
@@ -15,8 +15,11 @@ async fn decide_on_download() -> anyhow::Result<bool> {
     } else {
         let client = S3Client::new()?;
         let s3_file_head = client.head("CORPUSExtract.json.gz").await?;
+        let s3_md5 = s3_file_head.etag.unwrap().replace("\"", "");
         let md5 = crate::utils::md5::md5_of_file("cache/CORPUSExtract.json.gz").unwrap();
-        if s3_file_head.etag.unwrap() == md5 {
+
+        debug!("S3: {}, local: {md5}", s3_md5);
+        if s3_md5 == md5 {
             info!("Skipping download because cache matches");
             return Ok(false);
         }
@@ -66,7 +69,7 @@ struct LocationEntry {
     #[serde(rename = "TIPLOC")]
     tiploc: Option<String>,
     #[serde(rename = "3ALPHA")]
-    alpha3: Option<String>,
+    crs: Option<String>,
     #[serde(rename = "UIC")]
     uic: Option<String>,
     #[serde(rename = "NLCDESC")]
