@@ -1,7 +1,7 @@
 use log::debug;
 
-use crate::corpus::LocationEntry;
 pub use crate::db::schema::Location;
+use crate::providers::corpus::LocationEntry;
 
 impl Location {
     pub async fn _insert(
