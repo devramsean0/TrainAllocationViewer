@@ -1,5 +1,5 @@
 use log::info;
-use tokio::signal;
+use tokio::{signal, sync::broadcast};
 
 mod db;
 mod payload;
@@ -15,22 +15,14 @@ async fn main() -> anyhow::Result<()> {
         sqlx::sqlite::SqlitePool::connect("sqlite:data.db").await?,
     ));
     sqlx::migrate!().run(pool).await?;
-
     providers::corpus::update_corpus(pool).await?;
 
-    let mut kafka = sources::kafka::KafkaClient::new(providers::alloc_consist::callback)?;
-    kafka.subscribe(&["prod-1033-Passenger-Train-Allocation-and-Consist-1_0"])?;
+    let (shutdown_tx, _) = broadcast::channel::<()>(1);
+    providers::alloc_consist::init(&pool, &shutdown_tx).await?;
 
-    info!("Listening for messages…");
+    signal::ctrl_c().await.unwrap();
+    info!("Main recieved Ctrl+C, Exiting");
 
-    loop {
-        tokio::select! {
-            _msg = kafka.recv(pool) => {},
-            _ = signal::ctrl_c() => {
-                println!("Shutting down");
-                break;
-            }
-        }
-    }
+    let _ = shutdown_tx.send(());
     Ok(())
 }
