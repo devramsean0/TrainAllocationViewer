@@ -14,17 +14,19 @@ async fn decide_on_download() -> anyhow::Result<bool> {
         info!("Downloading because cache not found");
         return Ok(true);
     } else {
-        let client = S3Client::new()?;
-        let s3_file_head = client.head("CORPUSExtract.json.gz").await?;
-        let s3_md5 = s3_file_head.etag.unwrap().replace("\"", "");
-        let md5 = crate::utils::md5::md5_of_file("cache/CORPUSExtract.json.gz").unwrap();
+        if std::env::var("ENABLE_CORPUS_UPDATE")? == "true" {
+            let client = S3Client::new()?;
+            let s3_file_head = client.head("CORPUSExtract.json.gz").await?;
+            let s3_md5 = s3_file_head.etag.unwrap().replace("\"", "");
+            let md5 = crate::utils::md5::md5_of_file("cache/CORPUSExtract.json.gz").unwrap();
 
-        debug!("S3: {}, local: {md5}", s3_md5);
-        if s3_md5 == md5 {
-            info!("Skipping download because cache matches");
-            return Ok(false);
+            debug!("S3: {}, local: {md5}", s3_md5);
+            if s3_md5 == md5 {
+                info!("Skipping download because cache matches");
+                return Ok(false);
+            }
+            info!("Downloading because cache doesn't match");
         }
-        info!("Downloading because cache doesn't match");
         Ok(true)
     }
 }
