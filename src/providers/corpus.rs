@@ -54,6 +54,7 @@ pub async fn update_corpus(pool: &Pool<Sqlite>) -> anyhow::Result<()> {
     info!("Corpus Length: {}", json.tiplocdata.len());
 
     crate::db::location::Location::insert_bulk(&pool, &json.tiplocdata).await?;
+    info!("Finished updating the corpus!");
     Ok(())
 }
 

@@ -12,6 +12,7 @@ use sqlx::SqlitePool;
 use tokio::{spawn, sync::broadcast::Sender};
 
 pub mod allocation;
+pub mod vehicles;
 
 use crate::db::schema::{Allocation, Location, ResourceGroup, Vehicle};
 
@@ -126,6 +127,7 @@ impl Query {
         #[graphql(desc = "Filter by Allocation Destination Location")]
         allocation_dest_location: Option<String>,
         #[graphql(desc = "Filter by Resource Group ID")] resource_group_id: Option<String>,
+        #[graphql(desc = "Filter by Fleet")] fleet: Option<String>,
     ) -> Result<Option<Vec<Allocation>>, String> {
         let db = match ctx.data::<SqlitePool>() {
             Ok(db) => db,
@@ -134,14 +136,16 @@ impl Query {
 
         let res = match sqlx::query_as::<_, Allocation>(
             "
-            SELECT * FROM allocations
-                WHERE (CASE WHEN $1 IS NOT NULL THEN (id = $1) ELSE (id = id) END)
-                AND (CASE WHEN $2 IS NOT NULL THEN (date = $2) ELSE (date = date) END)
-                AND (CASE WHEN $3 IS NOT NULL THEN (origin_location = $3) ELSE (origin_location = origin_location) END)
-                AND (CASE WHEN $4 IS NOT NULL THEN (dest_location = $4) ELSE (dest_location = dest_location) END)
-                AND (CASE WHEN $5 IS NOT NULL THEN (allocation_origin_location = $5) ELSE (allocation_origin_location = allocation_origin_location) END)
-                AND (CASE WHEN $6 IS NOT NULL THEN (allocation_dest_location = $6) ELSE (allocation_dest_location = allocation_dest_location) END)
-                AND (CASE WHEN $7 IS NOT NULL THEN (resource_group_id = $7) ELSE (resource_group_id = resource_group_id) END)
+            SELECT allocations.* FROM allocations
+                LEFT JOIN resource_groups ON allocations.resource_group_id = resource_groups.id
+                WHERE (CASE WHEN $1 IS NOT NULL THEN (allocations.id = $1) ELSE (allocations.id = allocations.id) END)
+                AND (CASE WHEN $2 IS NOT NULL THEN (allocations.date = $2) ELSE (allocations.date = allocations.date) END)
+                AND (CASE WHEN $3 IS NOT NULL THEN (allocations.origin_location = $3) ELSE (allocations.origin_location = allocations.origin_location) END)
+                AND (CASE WHEN $4 IS NOT NULL THEN (allocations.dest_location = $4) ELSE (allocations.dest_location = allocations.dest_location) END)
+                AND (CASE WHEN $5 IS NOT NULL THEN (allocations.allocation_origin_location = $5) ELSE (allocations.allocation_origin_location = allocations.allocation_origin_location) END)
+                AND (CASE WHEN $6 IS NOT NULL THEN (allocations.allocation_dest_location = $6) ELSE (allocations.allocation_dest_location = allocations.allocation_dest_location) END)
+                AND (CASE WHEN $7 IS NOT NULL THEN (allocations.resource_group_id = $7) ELSE (allocations.resource_group_id = allocations.resource_group_id) END)
+                AND (CASE WHEN $8 IS NOT NULL THEN (resource_groups.fleet = $8) ELSE (resource_groups.fleet = resource_groups.fleet OR resource_groups.fleet IS NULL) END)
             ;",
         )
         .bind(id)
@@ -151,6 +155,7 @@ impl Query {
         .bind(allocation_origin_location)
         .bind(allocation_dest_location)
         .bind(resource_group_id)
+        .bind(fleet)
         .fetch_all(db)
         .await
         {

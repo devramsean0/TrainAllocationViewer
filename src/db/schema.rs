@@ -23,12 +23,14 @@ pub struct Allocation {
 }
 
 #[derive(Debug, Clone, FromRow, SimpleObject)]
+#[graphql(complex)]
 pub struct Vehicle {
     pub id: Option<i64>,
     pub livery: String,
     pub decor: Option<String>,
     pub vehicle_type: String,
     pub specific_type: String,
+    #[graphql(skip)]
     pub resource_group_id: String,
 }
 
