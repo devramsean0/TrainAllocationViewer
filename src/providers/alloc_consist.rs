@@ -5,33 +5,37 @@ use sqlx::{Pool, Sqlite};
 use tokio::{spawn, sync::broadcast::Sender};
 
 pub async fn init(pool: &'static Pool<Sqlite>, sender: &Sender<()>) -> anyhow::Result<()> {
-    let mut shutdown = sender.subscribe();
+    if std::env::var("ENABLE_ALLOCCONSIST_UPDATE")? == "true" {
+        let mut shutdown = sender.subscribe();
 
-    spawn(async move {
-        let mut kafka = match crate::sources::kafka::KafkaClient::new(callback) {
-            Ok(k) => k,
-            Err(e) => {
-                info!("Failed to create Kafka client: {:?}", e);
+        spawn(async move {
+            let mut kafka = match crate::sources::kafka::KafkaClient::new(callback) {
+                Ok(k) => k,
+                Err(e) => {
+                    info!("Failed to create Kafka client: {:?}", e);
+                    return;
+                }
+            };
+            if let Err(e) =
+                kafka.subscribe(&["prod-1033-Passenger-Train-Allocation-and-Consist-1_0"])
+            {
+                info!("Failed to subscribe Kafka topics: {:?}", e);
                 return;
             }
-        };
-        if let Err(e) = kafka.subscribe(&["prod-1033-Passenger-Train-Allocation-and-Consist-1_0"]) {
-            info!("Failed to subscribe Kafka topics: {:?}", e);
-            return;
-        }
 
-        info!("Listening for messages…");
+            info!("Listening for messages…");
 
-        loop {
-            tokio::select! {
-                _msg = kafka.recv(pool) => {},
-                _ = shutdown.recv() => {
-                   info!("Alloc Consist Task Shutting Down");
-                   break;
+            loop {
+                tokio::select! {
+                    _msg = kafka.recv(pool) => {},
+                    _ = shutdown.recv() => {
+                    info!("Alloc Consist Task Shutting Down");
+                    break;
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
     Ok(())
 }
