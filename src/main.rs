@@ -1,8 +1,11 @@
 use log::info;
 use tokio::{signal, sync::broadcast};
 
+use crate::jobs::init_scheduler;
+
 mod db;
 mod graphql;
+mod jobs;
 mod payload;
 mod providers;
 mod sources;
@@ -17,6 +20,8 @@ async fn main() -> anyhow::Result<()> {
     ));
     sqlx::migrate!().run(pool).await?;
     providers::corpus::update_corpus(pool).await?;
+
+    init_scheduler().await?;
 
     let (shutdown_tx, _) = broadcast::channel::<()>(1);
     providers::alloc_consist::init(&pool, &shutdown_tx).await?;

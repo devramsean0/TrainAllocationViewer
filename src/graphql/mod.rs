@@ -199,7 +199,7 @@ pub async fn serve(pool: &SqlitePool, sender: &Sender<()>) -> anyhow::Result<()>
         let _ = axum::serve(listener, router)
             .with_graceful_shutdown(async move {
                 let _ = shutdown.recv().await;
-                info!("GraphQL recieved Ctrl+C, Exiting")
+                info!("GraphQL server recieved Ctrl+C, Exiting")
             })
             .await;
     });
