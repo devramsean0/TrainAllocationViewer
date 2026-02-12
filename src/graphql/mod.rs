@@ -176,6 +176,9 @@ async fn graphiql() -> impl IntoResponse {
 }
 
 pub async fn serve(pool: &SqlitePool, sender: &Sender<()>) -> anyhow::Result<()> {
+    let host = std::env::var("HOST")?;
+    let port = std::env::var("GRAPHQL_PORT")?;
+
     let mut shutdown = sender.subscribe();
 
     let pool = pool.clone();
@@ -189,8 +192,10 @@ pub async fn serve(pool: &SqlitePool, sender: &Sender<()>) -> anyhow::Result<()>
             get(graphiql).post_service(GraphQL::new(schema.clone())),
         );
 
-        let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-
+        let listener = tokio::net::TcpListener::bind(format!("{host}:{port}"))
+            .await
+            .unwrap();
+        info!("GraphQL server listening on {host}:{port}");
         let _ = axum::serve(listener, router)
             .with_graceful_shutdown(async move {
                 let _ = shutdown.recv().await;
