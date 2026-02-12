@@ -31,7 +31,7 @@ pub struct ResourceGroup {
     pub fleet: String,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Clone, FromRow, async_graphql::SimpleObject)]
 pub struct Location {
     pub id: Option<i64>,
     pub nlc: String,

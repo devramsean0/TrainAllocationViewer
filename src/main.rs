@@ -2,6 +2,7 @@ use log::info;
 use tokio::{signal, sync::broadcast};
 
 mod db;
+mod graphql;
 mod payload;
 mod providers;
 mod sources;
@@ -19,6 +20,7 @@ async fn main() -> anyhow::Result<()> {
 
     let (shutdown_tx, _) = broadcast::channel::<()>(1);
     providers::alloc_consist::init(&pool, &shutdown_tx).await?;
+    graphql::serve(&pool, &shutdown_tx).await?;
 
     signal::ctrl_c().await.unwrap();
     info!("Main recieved Ctrl+C, Exiting");
