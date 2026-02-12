@@ -11,13 +11,9 @@ use log::info;
 use sqlx::SqlitePool;
 use tokio::{spawn, sync::broadcast::Sender};
 
-use crate::{
-    db::{
-        resource_group,
-        schema::{Allocation, Location, ResourceGroup, Vehicle},
-    },
-    graphql,
-};
+pub mod allocation;
+
+use crate::db::schema::{Allocation, Location, ResourceGroup, Vehicle};
 
 pub struct Query;
 
