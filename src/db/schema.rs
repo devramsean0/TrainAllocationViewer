@@ -1,6 +1,7 @@
+use async_graphql::SimpleObject;
 use sqlx::FromRow;
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Clone, FromRow, SimpleObject)]
 pub struct Allocation {
     pub id: Option<i64>,
     pub origin_datetime: String,
@@ -15,7 +16,7 @@ pub struct Allocation {
     pub resource_group_id: String,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Clone, FromRow, SimpleObject)]
 pub struct Vehicle {
     pub id: Option<i64>,
     pub livery: String,
@@ -25,13 +26,13 @@ pub struct Vehicle {
     pub resource_group_id: String,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Clone, FromRow, SimpleObject)]
 pub struct ResourceGroup {
     pub id: String,
     pub fleet: String,
 }
 
-#[derive(Debug, Clone, FromRow, async_graphql::SimpleObject)]
+#[derive(Debug, Clone, FromRow, SimpleObject)]
 pub struct Location {
     pub id: Option<i64>,
     pub nlc: String,
