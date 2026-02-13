@@ -82,17 +82,17 @@ pub struct OperationalTrainNumberIdentifier {
 #[derive(Deserialize, Debug)]
 pub struct Allocation {
     #[serde(rename = "AllocationSequenceNumber")]
-    pub _allocation_sequence_number: i64,
+    pub allocation_sequence_number: i64,
     #[serde(rename = "TrainOriginDateTime")]
     pub train_origin_date_time: String,
     #[serde(rename = "TrainOriginLocation")]
     pub train_origin_location: TrainLocation,
     #[serde(rename = "ResourceGroupPosition")]
-    pub _resource_group_position: i64,
+    pub resource_group_position: i64,
     #[serde(rename = "DiagramDate")]
     pub diagram_date: Option<String>,
     #[serde(rename = "DiagramNo")]
-    pub _diagram_no: Option<String>,
+    pub diagram_no: Option<String>,
     #[serde(rename = "TrainDestLocation")]
     pub train_dest_location: TrainLocation,
     #[serde(rename = "TrainDestDateTime")]
@@ -102,15 +102,15 @@ pub struct Allocation {
     #[serde(rename = "AllocationOriginDateTime")]
     pub allocation_origin_date_time: String,
     #[serde(rename = "AllocationOriginMiles")]
-    pub _allocation_origin_miles: i64,
+    pub allocation_origin_miles: i64,
     #[serde(rename = "AllocationDestinationLocation")]
     pub allocation_destination_location: TrainLocation,
     #[serde(rename = "AllocationDestinationDateTime")]
     pub allocation_destination_date_time: String,
     #[serde(rename = "AllocationDestinationMiles")]
-    pub _allocation_destination_miles: i64,
+    pub allocation_destination_miles: i64,
     #[serde(rename = "Reversed")]
-    pub _reversed: String,
+    pub reversed: String,
     #[serde(rename = "ResourceGroup")]
     pub resource_group: ResourceGroup,
 }
@@ -118,19 +118,19 @@ pub struct Allocation {
 #[derive(Deserialize, Debug)]
 pub struct TrainLocation {
     #[serde(rename = "CountryCodeISO")]
-    pub _country_code_iso: String,
+    pub country_code_iso: String,
     #[serde(rename = "LocationPrimaryCode")]
     pub location_primary_code: String,
     #[serde(rename = "LocationSubsidiaryIdentification")]
-    pub _location_subsidiary_identification: LocationSubsidiaryIdentification,
+    pub location_subsidiary_identification: LocationSubsidiaryIdentification,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct LocationSubsidiaryIdentification {
     #[serde(rename = "LocationSubsidiaryCode")]
-    pub _location_sibsidiary_code: String,
+    pub location_sibsidiary_code: String,
     #[serde(rename = "AllocationCompany")]
-    pub _allocation_company: String,
+    pub allocation_company: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -138,13 +138,13 @@ pub struct ResourceGroup {
     #[serde(rename = "ResourceGroupId")]
     pub resource_group_id: String,
     #[serde(rename = "TypeOfResource")]
-    pub _type_of_resource: String,
+    pub type_of_resource: String,
     #[serde(rename = "FleetId")]
     pub fleet_id: String,
     #[serde(rename = "ResourceGroupStatus")]
-    pub _resource_group_status: String,
+    pub resource_group_status: String,
     #[serde(rename = "EndOfDayMiles")]
-    pub _end_of_day_miles: String,
+    pub end_of_day_miles: String,
     #[serde(rename = "Vehicle")]
     pub vehicle: Vec<Vehicle>,
 }
@@ -156,43 +156,43 @@ pub struct Vehicle {
     #[serde(rename = "TypeOfVehicle")]
     pub type_of_vehicle: String,
     #[serde(rename = "ResourcePosition")]
-    pub _resource_position: i64,
+    pub resource_position: i64,
     #[serde(rename = "PlannedResourceGroup")]
-    pub _planned_resource_group: Option<String>,
+    pub planned_resource_group: Option<String>,
     #[serde(rename = "SpecificType")]
     pub specific_type: String,
     #[serde(rename = "Length")]
-    pub _length: Length,
+    pub length: Length,
     #[serde(rename = "Weight")]
-    pub _weight: i32,
+    pub weight: i32,
     #[serde(rename = "Livery")]
     pub livery: String,
     #[serde(rename = "Decor")]
     pub decor: Option<String>,
     #[serde(rename = "SpecialCharacteristics")]
-    pub _special_characteristics: Option<String>,
+    pub special_characteristics: Option<String>,
     #[serde(rename = "NumberOfSeats")]
-    pub _number_of_seats: Option<i32>,
+    pub number_of_seats: Option<i32>,
     #[serde(rename = "RegisteredStatus")]
-    pub _registered_status: String,
+    pub registered_status: String,
     #[serde(rename = "Cabs")]
-    pub _cabs: Option<i32>,
+    pub cabs: Option<i32>,
     #[serde(rename = "DateEnteredService")]
-    pub _date_entered_service: String,
+    pub date_entered_service: String,
     #[serde(rename = "DateRegistered")]
-    pub _date_registered: String,
+    pub date_registered: String,
     #[serde(rename = "RegisteredCategory")]
-    pub _registered_category: String,
+    pub registered_category: String,
     #[serde(rename = "TrainBrakeType")]
-    pub _train_brake_type: String,
+    pub train_brake_type: String,
     #[serde(rename = "MaximumSpeed")]
-    pub _maximum_speed: String,
+    pub maximum_speed: String,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Length {
     #[serde(rename = "Value")]
-    pub _value: String,
+    pub value: String,
     #[serde(rename = "Measure")]
-    pub _measure: String,
+    pub measure: String,
 }

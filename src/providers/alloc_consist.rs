@@ -53,6 +53,9 @@ pub fn callback(
                     ResourceGroup {
                         id: allocation.resource_group.resource_group_id.clone(),
                         fleet: allocation.resource_group.fleet_id,
+                        resource_type: Some(allocation.resource_group.type_of_resource),
+                        status: Some(allocation.resource_group.resource_group_status),
+                        end_of_day_miles: Some(allocation.resource_group.end_of_day_miles),
                     },
                 )
                 .await?;
@@ -63,18 +66,84 @@ pub fn callback(
                         id: None,
                         origin_datetime: allocation.train_origin_date_time,
                         origin_location: allocation.train_origin_location.location_primary_code,
+                        origin_country_code_iso: Some(
+                            allocation.train_origin_location.country_code_iso,
+                        ),
+                        origin_subsidiary_information_code: Some(
+                            allocation
+                                .train_origin_location
+                                .location_subsidiary_identification
+                                .location_sibsidiary_code,
+                        ),
+                        origin_subsidiary_information_company: Some(
+                            allocation
+                                .train_origin_location
+                                .location_subsidiary_identification
+                                .allocation_company,
+                        ),
                         date: allocation.diagram_date,
                         dest_location: allocation.train_dest_location.location_primary_code,
+                        dest_country_code_iso: Some(
+                            allocation.train_dest_location.country_code_iso,
+                        ),
+                        dest_subsidiary_information_code: Some(
+                            allocation
+                                .train_dest_location
+                                .location_subsidiary_identification
+                                .location_sibsidiary_code,
+                        ),
+                        dest_subsidiary_information_company: Some(
+                            allocation
+                                .train_dest_location
+                                .location_subsidiary_identification
+                                .allocation_company,
+                        ),
                         dest_datetime: allocation.train_dest_date_time,
                         allocation_origin_datetime: allocation.allocation_origin_date_time,
                         allocation_origin_location: allocation
                             .allocation_origin_location
                             .location_primary_code,
+                        allocation_origin_country_code_iso: Some(
+                            allocation.allocation_origin_location.country_code_iso,
+                        ),
+                        allocation_origin_subsidiary_information_code: Some(
+                            allocation
+                                .allocation_origin_location
+                                .location_subsidiary_identification
+                                .location_sibsidiary_code,
+                        ),
+                        allocation_origin_subsidiary_information_company: Some(
+                            allocation
+                                .allocation_origin_location
+                                .location_subsidiary_identification
+                                .allocation_company,
+                        ),
                         allocation_dest_datetime: allocation.allocation_destination_date_time,
                         allocation_dest_location: allocation
                             .allocation_destination_location
                             .location_primary_code,
+                        allocation_dest_country_code_iso: Some(
+                            allocation.allocation_destination_location.country_code_iso,
+                        ),
+                        allocation_dest_subsidiary_information_code: Some(
+                            allocation
+                                .allocation_destination_location
+                                .location_subsidiary_identification
+                                .location_sibsidiary_code,
+                        ),
+                        allocation_dest_subsidiary_information_company: Some(
+                            allocation
+                                .allocation_destination_location
+                                .location_subsidiary_identification
+                                .allocation_company,
+                        ),
                         resource_group_id: resource_group.id.clone(),
+                        sequence_number: Some(allocation.allocation_sequence_number),
+                        resource_group_position: Some(allocation.resource_group_position),
+                        diagram_no: allocation.diagram_no,
+                        origin_miles: Some(allocation.allocation_origin_miles),
+                        destination_miles: Some(allocation.allocation_destination_miles),
+                        reversed: Some(allocation.reversed),
                     },
                 )
                 .await?;
@@ -89,6 +158,19 @@ pub fn callback(
                             specific_type: vehicle.specific_type,
                             vehicle_type: vehicle.type_of_vehicle,
                             resource_group_id: resource_group.id.clone(),
+                            resource_position: Some(vehicle.resource_position),
+                            planned_resource_group: vehicle.planned_resource_group,
+                            length_value: Some(vehicle.length.value),
+                            length_measure: Some(vehicle.length.measure),
+                            weight: Some(vehicle.weight),
+                            special_characteristics: vehicle.special_characteristics,
+                            seat_count: vehicle.number_of_seats,
+                            cab_count: vehicle.cabs,
+                            date_entered_service: Some(vehicle.date_entered_service),
+                            date_registered: Some(vehicle.date_registered),
+                            category: Some(vehicle.registered_category),
+                            brake_type: Some(vehicle.train_brake_type),
+                            max_speed: Some(vehicle.maximum_speed),
                         },
                     )
                     .await?;

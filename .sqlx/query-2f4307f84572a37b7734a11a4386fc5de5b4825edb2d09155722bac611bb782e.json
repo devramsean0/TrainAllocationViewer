@@ -1,0 +1,68 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO locations (\n                nlc,\n                stanox,\n                tiploc,\n                crs,\n                uic,\n                nlcdesc,\n                axis,\n                nlcdesc16\n            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)\n            RETURNING id, nlc, stanox, tiploc, crs, uic, nlcdesc, axis, nlcdesc16",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "nlc",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "stanox",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "tiploc",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "crs",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "uic",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "nlcdesc",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "axis",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "nlcdesc16",
+        "ordinal": 8,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "2f4307f84572a37b7734a11a4386fc5de5b4825edb2d09155722bac611bb782e"
+}
