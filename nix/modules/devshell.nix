@@ -13,8 +13,14 @@
         bacon
         openssl
         pkg-config
+        wrapGAppsHook4
+
         sqlx-cli
         sqlite
+        cargo-tauri
+
+        librsvg
+        webkitgtk_4_1
       ];
     };
   };

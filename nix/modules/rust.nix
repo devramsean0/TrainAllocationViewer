@@ -7,14 +7,17 @@
     inputs.cargo-doc-live.flakeModule
   ];
   perSystem = { config, self', pkgs, lib, ... }: {
-    rust-project.crates."train-allocation-viewer".crane.args = {
-      buildInputs = lib.optionals pkgs.stdenv.isDarwin
-        (
-          with pkgs.darwin.apple_sdk.frameworks; [
-            IOKit
-          ]
-        ) ++ [ pkgs.openssl ];
-      nativeBuildInputs = [ pkgs.pkg-config ];
+    rust-project.crates."train-allocation-viewer" = {
+      crane.args = {
+        buildInputs = lib.optionals pkgs.stdenv.isDarwin
+          (
+            with pkgs.darwin.apple_sdk.frameworks; [
+              IOKit
+            ]
+          ) ++ [ pkgs.openssl ];
+        nativeBuildInputs = [ pkgs.pkg-config ];
+      };
+      path = ../../packages/api;
     };
     packages.default = self'.packages.train-allocation-viewer;
   };
