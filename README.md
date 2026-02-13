@@ -48,3 +48,11 @@ We also provide a [`justfile`](https://just.systems/) for Makefile'esque command
 ## See Also
 
 - [nixos.wiki: Packaging Rust projects with nix](https://nixos.wiki/wiki/Rust#Packaging_Rust_projects_with_nix)
+
+# Notes:
+- Build updated kotlin sdk version:
+```sh
+cd packages/sdk
+cargo build --release
+cargo run --bin uniffi-bindgen generate --library target/release/libsdk.so --language kotlin --out-dir ../../target
+```
