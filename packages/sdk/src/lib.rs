@@ -1,4 +1,6 @@
 uniffi::setup_scaffolding!();
+#[cynic::schema("api")]
+mod schema {}
 
 #[uniffi::export]
 pub fn add(left: u64, right: u64) -> u64 {

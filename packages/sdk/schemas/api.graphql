@@ -1,0 +1,159 @@
+type Allocation {
+  id: Int
+  originDatetime: String!
+  originCountryCodeIso: String
+  originSubsidiaryInformationCode: String
+  originSubsidiaryInformationCompany: String
+  date: String
+  destCountryCodeIso: String
+  destSubsidiaryInformationCode: String
+  destSubsidiaryInformationCompany: String
+  destDatetime: String!
+  allocationOriginDatetime: String!
+  allocationOriginCountryCodeIso: String
+  allocationOriginSubsidiaryInformationCode: String
+  allocationOriginSubsidiaryInformationCompany: String
+  allocationDestDatetime: String!
+  allocationDestCountryCodeIso: String
+  allocationDestSubsidiaryInformationCode: String
+  allocationDestSubsidiaryInformationCompany: String
+  sequenceNumber: Int
+  resourceGroupPosition: Int
+  diagramNo: String
+  originMiles: Int
+  destinationMiles: Int
+  reversed: String
+  originLocation: Location
+  destLocation: Location
+  allocationOriginLocation: Location
+  allocationDestLocation: Location
+  resourceGroup: ResourceGroup
+}
+
+type Location {
+  id: Int
+  nlc: String!
+  stanox: String
+  tiploc: String
+  crs: String
+  uic: String
+  nlcdesc: String
+  axis: String
+  nlcdesc16: String
+}
+
+type Query {
+  hello: String!
+  locations(
+    """
+    Filter by NLC
+    """
+    nlc: String
+  ): [Location!]
+  resouceGroups(
+    """
+    Filter by ID
+    """
+    id: String
+    """
+    Filter by SpecificType
+    """
+    specificType: String
+  ): [ResourceGroup!]
+  vehicles(
+    """
+    Filter by ID
+    """
+    id: Int
+    """
+    Filter by Livery
+    """
+    livery: String
+    """
+    Filter by Decor
+    """
+    decor: String
+    """
+    Filter by Vehicle Type
+    """
+    vehicleType: String
+    """
+    Filter by Specific Type
+    """
+    specificType: String
+    """
+    Filter by Resource Group ID
+    """
+    resourceGroupId: String
+  ): [Vehicle!]
+  allocations(
+    """
+    Filter by ID
+    """
+    id: Int
+    """
+    Filter by Date
+    """
+    date: String
+    """
+    Filter by Origin Location
+    """
+    originLocation: String
+    """
+    Filter by Destination Location
+    """
+    destLocation: String
+    """
+    Filter by Allocation Origin Location
+    """
+    allocationOriginLocation: String
+    """
+    Filter by Allocation Destination Location
+    """
+    allocationDestLocation: String
+    """
+    Filter by Resource Group ID
+    """
+    resourceGroupId: String
+    """
+    Filter by Fleet
+    """
+    fleet: String
+  ): [Allocation!]
+}
+
+type ResourceGroup {
+  id: String!
+  fleet: String!
+  resourceType: String
+  status: String
+  endOfDayMiles: String
+}
+
+type Vehicle {
+  id: Int
+  livery: String!
+  decor: String
+  vehicleType: String!
+  specificType: String!
+  resourcePosition: Int
+  plannedResourceGroup: String
+  lengthValue: String
+  lengthMeasure: String
+  weight: Int
+  specialCharacteristics: String
+  seatCount: Int
+  cabCount: Int
+  dateEnteredService: String
+  dateRegistered: String
+  category: String
+  brakeType: String
+  maxSpeed: String
+  resourceGroup: ResourceGroup
+}
+
+"""
+Indicates that an Input Object is a OneOf Input Object (and thus requires exactly one of its field be provided)
+"""
+directive @oneOf on INPUT_OBJECT
+

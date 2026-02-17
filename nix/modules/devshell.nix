@@ -22,6 +22,10 @@
         librsvg
         webkitgtk_4_1
       ];
+
+      shellHook = ''
+        export PATH="$HOME/.cargo/bin:$PATH"
+      '';
     };
   };
 }
