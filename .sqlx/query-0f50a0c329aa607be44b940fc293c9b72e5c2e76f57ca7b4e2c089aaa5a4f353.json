@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO vehicles (\n                id,\n                livery,\n                decor,\n                vehicle_type,\n                specific_type,\n                resource_group_id,\n                resource_position,\n                planned_resource_group,\n                length_value,\n                length_measure,\n                weight,\n                special_characteristics,\n                seat_count,\n                cab_count,\n                date_entered_service,\n                date_registered,\n                category,\n                brake_type,\n                max_speed\n            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)\n            ON CONFLICT(id) DO UPDATE SET\n                livery = excluded.livery,\n                decor = excluded.decor,\n                vehicle_type = excluded.vehicle_type,\n                specific_type = excluded.specific_type,\n                resource_group_id = excluded.resource_group_id,\n                resource_position = excluded.resource_position,\n                planned_resource_group = excluded.planned_resource_group,\n                length_value = excluded.length_value,\n                length_measure = excluded.length_measure,\n                weight = excluded.weight,\n                special_characteristics = excluded.special_characteristics,\n                seat_count = excluded.seat_count,\n                cab_count = excluded.cab_count,\n                date_entered_service = excluded.date_entered_service,\n                date_registered = excluded.date_registered,\n                category = excluded.category,\n                brake_type = excluded.brake_type,\n                max_speed = excluded.max_speed",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 19
+    },
+    "nullable": []
+  },
+  "hash": "0f50a0c329aa607be44b940fc293c9b72e5c2e76f57ca7b4e2c089aaa5a4f353"
+}

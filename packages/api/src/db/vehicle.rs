@@ -7,7 +7,7 @@ impl Vehicle {
         pool: &sqlx::sqlite::SqlitePool,
         vehicle: Vehicle,
     ) -> Result<(), sqlx::Error> {
-        sqlx::query!(
+        sqlx::query(
             "INSERT INTO vehicles (
                 id,
                 livery,
@@ -47,27 +47,26 @@ impl Vehicle {
                 date_registered = excluded.date_registered,
                 category = excluded.category,
                 brake_type = excluded.brake_type,
-                max_speed = excluded.max_speed",
-            vehicle.id,
-            vehicle.livery,
-            vehicle.decor,
-            vehicle.vehicle_type,
-            vehicle.specific_type,
-            vehicle.resource_group_id,
-            vehicle.resource_position,
-            vehicle.planned_resource_group,
-            vehicle.length_value,
-            vehicle.length_measure,
-            vehicle.weight,
-            vehicle.special_characteristics,
-            vehicle.seat_count,
-            vehicle.cab_count,
-            vehicle.date_entered_service,
-            vehicle.date_registered,
-            vehicle.category,
-            vehicle.brake_type,
-            vehicle.max_speed
-        )
+                max_speed = excluded.max_speed")
+            .bind(vehicle.id)
+            .bind(vehicle.livery)
+            .bind(vehicle.decor)
+            .bind(vehicle.vehicle_type)
+            .bind(vehicle.specific_type)
+            .bind(vehicle.resource_group_id)
+            .bind(vehicle.resource_position)
+            .bind(vehicle.planned_resource_group)
+            .bind(vehicle.length_value)
+            .bind(vehicle.length_measure)
+            .bind(vehicle.weight)
+            .bind(vehicle.special_characteristics)
+            .bind(vehicle.seat_count)
+            .bind(vehicle.cab_count)
+            .bind(vehicle.date_entered_service)
+            .bind(vehicle.date_registered)
+            .bind(vehicle.category)
+            .bind(vehicle.brake_type)
+            .bind(vehicle.max_speed)
         .execute(pool)
         .await?;
         debug!("Upserted Vehicle with ID: {:?}", vehicle.id);

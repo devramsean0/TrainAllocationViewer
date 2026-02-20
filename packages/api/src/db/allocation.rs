@@ -7,8 +7,7 @@ impl Allocation {
         pool: &sqlx::sqlite::SqlitePool,
         alloc: Allocation,
     ) -> Result<(), sqlx::Error> {
-        let row = sqlx::query_as!(
-            Allocation,
+        let row = sqlx::query_as::<_, Allocation>(
             "INSERT INTO allocations (
                 origin_datetime,
                 origin_location,
@@ -68,36 +67,35 @@ impl Allocation {
                 diagram_no,
                 origin_miles,
                 destination_miles,
-                reversed",
-                alloc.origin_datetime,
-                alloc.origin_location,
-                alloc.origin_country_code_iso,
-                alloc.origin_subsidiary_information_code,
-                alloc.origin_subsidiary_information_company,
-                alloc.date,
-                alloc.dest_location,
-                alloc.dest_country_code_iso,
-                alloc.dest_subsidiary_information_code,
-                alloc.dest_subsidiary_information_company,
-                alloc.dest_datetime,
-                alloc.allocation_origin_datetime,
-                alloc.allocation_origin_location,
-                alloc.allocation_origin_country_code_iso,
-                alloc.allocation_origin_subsidiary_information_code,
-                alloc.allocation_origin_subsidiary_information_company,
-                alloc.allocation_dest_datetime,
-                alloc.allocation_dest_location,
-                alloc.allocation_dest_country_code_iso,
-                alloc.allocation_dest_subsidiary_information_code,
-                alloc.allocation_dest_subsidiary_information_company,
-                alloc.resource_group_id,
-                alloc.sequence_number,
-                alloc.resource_group_position,
-                alloc.diagram_no,
-                alloc.origin_miles,
-                alloc.destination_miles,
-                alloc.reversed
-        )
+                reversed")
+            .bind(alloc.origin_datetime)
+            .bind(alloc.origin_location)
+            .bind(alloc.origin_country_code_iso)
+            .bind(alloc.origin_subsidiary_information_code)
+            .bind(alloc.origin_subsidiary_information_company)
+            .bind(alloc.date)
+            .bind(alloc.dest_location)
+            .bind(alloc.dest_country_code_iso)
+            .bind(alloc.dest_subsidiary_information_code)
+            .bind(alloc.dest_subsidiary_information_company)
+            .bind(alloc.dest_datetime)
+            .bind(alloc.allocation_origin_datetime)
+            .bind(alloc.allocation_origin_location)
+            .bind(alloc.allocation_origin_country_code_iso)
+            .bind(alloc.allocation_origin_subsidiary_information_code)
+            .bind(alloc.allocation_origin_subsidiary_information_company)
+            .bind(alloc.allocation_dest_datetime)
+            .bind(alloc.allocation_dest_location)
+            .bind(alloc.allocation_dest_country_code_iso)
+            .bind(alloc.allocation_dest_subsidiary_information_code)
+            .bind(alloc.allocation_dest_subsidiary_information_company)
+            .bind(alloc.resource_group_id)
+            .bind(alloc.sequence_number)
+            .bind(alloc.resource_group_position)
+            .bind(alloc.diagram_no)
+            .bind(alloc.origin_miles)
+            .bind(alloc.destination_miles)
+            .bind(alloc.reversed)
         .fetch_one(pool)
         .await?;
         debug!("Inserted Allocation with ID: {:?}", row.id);

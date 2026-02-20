@@ -8,8 +8,7 @@ impl Location {
         pool: &sqlx::sqlite::SqlitePool,
         loc: Location,
     ) -> Result<(), sqlx::Error> {
-        let row = sqlx::query_as!(
-            Location,
+        let row = sqlx::query_as::<_, Location>(
             "INSERT INTO locations (
                 nlc,
                 stanox,
@@ -21,15 +20,15 @@ impl Location {
                 nlcdesc16
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
             RETURNING id, nlc, stanox, tiploc, crs, uic, nlcdesc, axis, nlcdesc16",
-            loc.nlc,
-            loc.stanox,
-            loc.tiploc,
-            loc.crs,
-            loc.uic,
-            loc.nlcdesc,
-            loc.axis,
-            loc.nlcdesc16
         )
+        .bind(loc.nlc)
+        .bind(loc.stanox)
+        .bind(loc.tiploc)
+        .bind(loc.crs)
+        .bind(loc.uic)
+        .bind(loc.nlcdesc)
+        .bind(loc.axis)
+        .bind(loc.nlcdesc16)
         .fetch_one(pool)
         .await?;
         debug!("Inserted Allocation with ID: {:?}", row.id);

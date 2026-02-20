@@ -14,7 +14,7 @@
             with pkgs.darwin.apple_sdk.frameworks; [
               IOKit
             ]
-          ) ++ [ pkgs.openssl ];
+          ) ++ [ pkgs.openssl (pkgs.callPackage ../packages/librdkafka.nix { }) ];
         nativeBuildInputs = [ pkgs.pkg-config ];
       };
       path = ../../packages/api;
