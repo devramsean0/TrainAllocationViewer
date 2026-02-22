@@ -1,19 +1,18 @@
 uniffi::setup_scaffolding!();
-#[cynic::schema("api")]
-mod schema {}
+
+use graphql_client::GraphQLQuery;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schema.graphql",
+    query_path = "queries/allocations/forfleet.graphql"
+)]
+pub struct AllocationsForFleetQuery;
 
 #[uniffi::export]
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub async fn get_allocations_for_fleet(fleet: String) {
+    let variables = allocations_for_fleet_query::Variables { fleet };
+    let body = AllocationsForFleetQuery::build_query(variables);
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+    let client = reqwest::blocking::Client::new();
 }

@@ -1,0 +1,8 @@
+query AllocationsForFleetQuery($fleet: String!) {
+    allocations(fleet: $fleet) {
+        id,
+        resourceGroup {
+            id
+        }
+    }
+}
