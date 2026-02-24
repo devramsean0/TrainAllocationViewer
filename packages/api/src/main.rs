@@ -18,7 +18,9 @@ async fn main() -> anyhow::Result<()> {
     let pool: &'static sqlx::sqlite::SqlitePool = Box::leak(Box::new(
         sqlx::sqlite::SqlitePool::connect("sqlite:data.db").await?,
     ));
+    info!("Running database migrations...");
     sqlx::migrate!().run(pool).await?;
+    info!("Database migrations completed successfully");
     providers::corpus::update_corpus(pool).await?;
 
     init_scheduler().await?;

@@ -15,6 +15,7 @@ async fn decide_on_download() -> anyhow::Result<bool> {
         return Ok(true);
     } else {
         if std::env::var("ENABLE_CORPUS_UPDATE")? == "true" {
+            info!("Downloading because environment variable set");
             let client = S3Client::new()?;
             let s3_file_head = client.head("CORPUSExtract.json.gz").await?;
             let s3_md5 = s3_file_head.etag.unwrap().replace("\"", "");
@@ -26,6 +27,8 @@ async fn decide_on_download() -> anyhow::Result<bool> {
                 return Ok(false);
             }
             info!("Downloading because cache doesn't match");
+        } else {
+            return Ok(false);
         }
         Ok(true)
     }

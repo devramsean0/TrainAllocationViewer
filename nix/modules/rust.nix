@@ -7,6 +7,15 @@
     inputs.cargo-doc-live.flakeModule
   ];
   perSystem = { config, self', pkgs, lib, ... }: {
+    rust-project.src = lib.cleanSourceWith {
+      src = ../..;
+      filter = path: type:
+        # Include migrations folder
+        (lib.hasInfix "/migrations/" path) ||
+        (lib.hasSuffix "/migrations" path) ||
+        # Default crane filter for Rust sources
+        (config.rust-project.crane-lib.filterCargoSources path type);
+    };
     rust-project.crates."train-allocation-viewer" = {
       crane.args = {
         buildInputs = lib.optionals pkgs.stdenv.isDarwin
