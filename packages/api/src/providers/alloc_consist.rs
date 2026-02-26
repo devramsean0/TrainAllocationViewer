@@ -53,7 +53,7 @@ pub fn callback(
                     ResourceGroup {
                         id: allocation.resource_group.resource_group_id.clone(),
                         fleet: allocation.resource_group.fleet_id,
-                        resource_type: Some(allocation.resource_group.type_of_resource),
+                        resource_type: Some(allocation.resource_group.type_of_resource.to_string()),
                         status: Some(allocation.resource_group.resource_group_status),
                         end_of_day_miles: Some(allocation.resource_group.end_of_day_miles),
                     },
