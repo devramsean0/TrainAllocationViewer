@@ -1,5 +1,5 @@
 use s3::{
-    types::{GetObjectOutput, HeadObjectOutput},
+    types::{GetObjectOutput, HeadObjectOutput, ListObjectsV2Output},
     Auth, Client,
 };
 
@@ -25,7 +25,7 @@ impl S3Client {
         })
     }
 
-    pub async fn head(self, object: &'static str) -> s3::Result<HeadObjectOutput> {
+    pub async fn head(self, object: String) -> s3::Result<HeadObjectOutput> {
         let req = self
             .client
             .objects()
@@ -35,11 +35,22 @@ impl S3Client {
         Ok(req)
     }
 
-    pub async fn get(self, object: &'static str) -> s3::Result<GetObjectOutput> {
+    pub async fn get(&self, object: String) -> s3::Result<GetObjectOutput> {
         let req = self
             .client
             .objects()
-            .get(self.bucket, object)
+            .get(self.bucket.clone(), object)
+            .send()
+            .await?;
+        Ok(req)
+    }
+
+    pub async fn listv2(&self, prefix: &'static str) -> s3::Result<ListObjectsV2Output> {
+        let req = self
+            .client
+            .objects()
+            .list_v2(self.bucket.clone())
+            .prefix(prefix)
             .send()
             .await?;
         Ok(req)

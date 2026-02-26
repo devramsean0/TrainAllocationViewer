@@ -1,4 +1,5 @@
-use log::debug;
+use log::{debug, info};
+use sqlx::sqlite::SqliteQueryResult;
 
 pub use crate::db::schema::Allocation;
 
@@ -100,5 +101,14 @@ impl Allocation {
         .await?;
         debug!("Inserted Allocation with ID: {:?}", row.id);
         Ok(())
+    }
+
+    pub async fn count(pool: &sqlx::sqlite::SqlitePool) -> Result<i64, sqlx::Error> {
+        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM allocations;")
+            .fetch_one(pool)
+            .await?;
+
+        info!("Counted allocations: {count}");
+        Ok(count)
     }
 }

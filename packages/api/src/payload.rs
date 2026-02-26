@@ -199,8 +199,10 @@ pub struct Length {
     pub measure: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub enum ResourceGroupType {
+    #[default]
+    Unknown,
     #[serde(rename = "S")]
     Set,
     #[serde(rename = "U")]

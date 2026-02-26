@@ -23,6 +23,13 @@ async fn main() -> anyhow::Result<()> {
     info!("Database migrations completed successfully");
     providers::corpus::update_corpus(pool).await?;
 
+    if db::allocation::Allocation::count(pool).await? == 0
+        || std::env::var("FORCE_ALLOC_ARCHIVE_UPDATE").unwrap_or_default() == "true"
+    {
+        info!("No Allocations, Updating from archive");
+        providers::alloc_consist_archive::download_archive(pool).await?;
+    };
+
     init_scheduler().await?;
 
     let (shutdown_tx, _) = broadcast::channel::<()>(1);
