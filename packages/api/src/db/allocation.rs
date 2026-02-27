@@ -1,5 +1,4 @@
 use log::{debug, info};
-use sqlx::sqlite::SqliteQueryResult;
 
 pub use crate::db::schema::Allocation;
 
