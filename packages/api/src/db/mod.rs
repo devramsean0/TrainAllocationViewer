@@ -1,3 +1,4 @@
+pub mod alloc_archive_log;
 pub mod allocation;
 pub mod location;
 pub mod resource_group;

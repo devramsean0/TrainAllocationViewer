@@ -1,3 +1,5 @@
+use std::fs;
+
 use log::info;
 use tokio::{signal, sync::broadcast};
 
@@ -15,6 +17,7 @@ mod utils;
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+
     let pool: &'static sqlx::sqlite::SqlitePool = Box::leak(Box::new(
         sqlx::sqlite::SqlitePool::connect("sqlite:data.db").await?,
     ));

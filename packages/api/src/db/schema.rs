@@ -86,3 +86,9 @@ pub struct Location {
     pub axis: Option<String>,
     pub nlcdesc16: Option<String>,
 }
+
+#[derive(Debug, Clone, FromRow)]
+pub struct AllocArchiveLog {
+    pub id: Option<i64>,
+    pub file_name: String,
+}
