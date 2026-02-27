@@ -63,12 +63,11 @@ pub async fn download_archive(pool: &'static sqlx::SqlitePool) -> anyhow::Result
 
                     info!("Decompressed {file_key}");
 
-                    for line in xml_string.split("\n") {
-                        let split_line = line.split_once("$");
-                        let parsed = crate::payload::handle_payload(
-                            split_line.unwrap_or_default().1.to_bytes(),
-                        )
-                        .unwrap_or_default();
+                    let messages = parse_xml_messages(&xml_string);
+
+                    for xml_content in messages {
+                        let parsed = crate::payload::handle_payload(xml_content.as_bytes())
+                            .unwrap_or_default();
                         if parsed.allocation.is_some() {
                             for allocation in parsed.allocation.unwrap() {
                                 let resource_group =
@@ -246,4 +245,55 @@ pub async fn download_archive(pool: &'static sqlx::SqlitePool) -> anyhow::Result
         }
     });
     Ok(())
+}
+
+/// Parses XML messages from a string that may contain multiple messages.
+/// Each message is prefixed with a message ID followed by '$', and the XML content
+/// can span multiple lines. Messages start with '<?xml' or '<PassengerTrainConsistMessage'.
+/// Function contributed by AI, because I am an idiot :3
+fn parse_xml_messages(content: &str) -> Vec<String> {
+    let mut messages = Vec::new();
+    let mut current_message = String::new();
+    let mut in_message = false;
+
+    for line in content.lines() {
+        if let Some(dollar_pos) = line.find('$') {
+            let after_dollar = &line[dollar_pos + 1..];
+            if after_dollar.trim_start().starts_with("<?xml")
+                || after_dollar
+                    .trim_start()
+                    .starts_with("<PassengerTrainConsistMessage")
+            {
+                if in_message && !current_message.trim().is_empty() {
+                    messages.push(current_message.trim().to_string());
+                }
+                current_message = after_dollar.to_string();
+                in_message = true;
+                continue;
+            }
+        }
+
+        if line.trim_start().starts_with("<?xml")
+            || line
+                .trim_start()
+                .starts_with("<PassengerTrainConsistMessage")
+        {
+            if in_message && !current_message.trim().is_empty() {
+                messages.push(current_message.trim().to_string());
+            }
+            current_message = line.to_string();
+            in_message = true;
+            continue;
+        }
+
+        if in_message {
+            current_message.push('\n');
+            current_message.push_str(line);
+        }
+    }
+    if in_message && !current_message.trim().is_empty() {
+        messages.push(current_message.trim().to_string());
+    }
+
+    messages
 }
