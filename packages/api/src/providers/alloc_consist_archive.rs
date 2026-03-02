@@ -23,6 +23,20 @@ async fn decide_on_download(file: String) -> anyhow::Result<bool> {
         let md5 = crate::utils::md5::md5_of_file(format!("cache/{file}").as_str()).unwrap();
 
         debug!("S3: {}, local: {md5}", s3_md5);
+
+        if s3_md5.contains("-") {
+            debug!("Multipart Upload detected, falling back to content length");
+            if s3_file_head.content_length
+                == Some(fs::read(format!("cache/{file}")).unwrap().len() as u64)
+            {
+                info!("Skipping Download because content length matches");
+                return Ok(false);
+            } else {
+                info!("Downloading because content length doesn't match");
+                return Ok(true);
+            }
+        }
+
         if s3_md5 == md5 {
             info!("Skipping download because cache matches");
             return Ok(false);
