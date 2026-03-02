@@ -52,6 +52,7 @@ pub async fn download_archive(pool: &'static sqlx::PgPool) -> anyhow::Result<()>
 
         let mut message_count: i128 = 0;
         for file in files.contents {
+            let mut file_message_count: i128 = 0;
             let file_key: String = file.key.clone();
             let db = AllocArchiveLog::get_by_filename(pool, file_key.clone()).await;
             match db {
@@ -244,8 +245,9 @@ pub async fn download_archive(pool: &'static sqlx::PgPool) -> anyhow::Result<()>
                                 }
                             }
                             message_count += 1;
+                            file_message_count += 1;
                             if message_count % 1000 == 0 {
-                                info!("Processed 1000 messages ({message_count})");
+                                info!("Processed 1000 messages ({message_count}) (file: {file_message_count}");
                             }
                         }
                     }

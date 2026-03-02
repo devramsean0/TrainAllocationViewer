@@ -78,7 +78,7 @@ pub struct OperationalTrainNumberIdentifier {
     #[serde(rename = "ScheduledTimeAtHandover")]
     pub _scheduled_time_at_handover: String,
     #[serde(rename = "ScheduledDateTimeAtTransfer")]
-    pub _scheduled_date_time_at_transfer: String,
+    pub _scheduled_date_time_at_transfer: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]

@@ -73,11 +73,11 @@ async fn main() -> anyhow::Result<()> {
 
                 match producer.send(record, Duration::from_secs(5)).await {
                     Ok(_) => {
-                        if let Some(k) = key {
-                            info!("Message with key {} sent", String::from_utf8(k.to_vec())?);
-                        } else {
-                            info!("Message Sent");
-                        }
+                        //if let Some(k) = key {
+                        //    info!("Message with key {} sent", String::from_utf8(k.to_vec())?);
+                        //} else {
+                        info!("Message Sent");
+                        //}
                     }
                     Err(e) => {
                         error!("Error sending message: {:?}", e);
