@@ -28,6 +28,19 @@
       };
       path = ../../packages/api;
     };
+
+    rust-project.crates."kafkaproxy" = {
+      crane.args = {
+        buildInputs = lib.optionals pkgs.stdenv.isDarwin
+          (
+            with pkgs.darwin.apple_sdk.frameworks; [
+              IOKit
+            ]
+          ) ++ [ pkgs.openssl (pkgs.callPackage ../packages/librdkafka.nix { }) ];
+        nativeBuildInputs = [ pkgs.pkg-config ];
+      };
+      path = ../../packages/kafkaproxy;
+    };
     packages.default = self'.packages.train-allocation-viewer;
   };
 }

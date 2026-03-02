@@ -45,7 +45,7 @@ impl Query {
         Ok(Some(res))
     }
 
-    async fn resouce_groups(
+    async fn resource_groups(
         &self,
         ctx: &Context<'_>,
         #[graphql(desc = "Filter by ID")] id: Option<String>,

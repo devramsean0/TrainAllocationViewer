@@ -1,0 +1,14 @@
+[package]
+name = "kafkaproxy"
+description = "Simple proxy for kafka"
+edition = "2024"
+version.workspace = true
+
+[dependencies]
+tokio = { version = "1.49.0", features = ["full"] }
+rdkafka = { version = "0.39.0", features = ["ssl", "dynamic-linking"] }
+log = "0.4.29"
+dotenv = "0.15.0"
+env_logger = "0.11.8"
+anyhow = "1.0.101"
+futures = "0.3.31"
