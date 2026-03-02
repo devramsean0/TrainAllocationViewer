@@ -19,17 +19,17 @@ impl KafkaClient {
     pub fn new(callback: CallbackFn) -> anyhow::Result<Self> {
         let host = std::env::var("KAFKA_HOST")?;
         let group = std::env::var("KAFKA_GROUP")?;
-        let username = std::env::var("KAFKA_USERNAME")?;
-        let password = std::env::var("KAFKA_PASSWORD")?;
+        //let username = std::env::var("KAFKA_USERNAME")?;
+        //let password = std::env::var("KAFKA_PASSWORD")?;
 
         let consumer: StreamConsumer = ClientConfig::new()
             .set("bootstrap.servers", host)
             .set("group.id", group)
             .set("auto.offset.reset", "earliest")
-            .set("security.protocol", "SASL_SSL")
-            .set("sasl.mechanism", "PLAIN")
-            .set("sasl.username", username)
-            .set("sasl.password", password)
+            //.set("security.protocol", "SASL_SSL")
+            //.set("sasl.mechanism", "PLAIN")
+            //.set("sasl.username", username)
+            //.set("sasl.password", password)
             .set("enable.auto.commit", "true")
             .create()?;
 
