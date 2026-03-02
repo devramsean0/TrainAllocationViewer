@@ -1,3 +1,5 @@
+use std::fmt;
+
 use log::error;
 use serde::Deserialize;
 
@@ -138,7 +140,7 @@ pub struct ResourceGroup {
     #[serde(rename = "ResourceGroupId")]
     pub resource_group_id: String,
     #[serde(rename = "TypeOfResource")]
-    pub type_of_resource: String,
+    pub type_of_resource: ResourceGroupType,
     #[serde(rename = "FleetId")]
     pub fleet_id: String,
     #[serde(rename = "ResourceGroupStatus")]
@@ -195,4 +197,22 @@ pub struct Length {
     pub value: String,
     #[serde(rename = "Measure")]
     pub measure: String,
+}
+
+#[derive(Deserialize, Debug, Default)]
+pub enum ResourceGroupType {
+    #[default]
+    Unknown,
+    #[serde(rename = "S")]
+    Set,
+    #[serde(rename = "U")]
+    Unit,
+    #[serde(rename = "L")]
+    Locomotive,
+}
+
+impl fmt::Display for ResourceGroupType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }

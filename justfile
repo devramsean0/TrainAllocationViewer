@@ -12,3 +12,8 @@ run *ARGS:
 # Run 'bacon' to run the project (auto-recompiles)
 watch *ARGS:
 	bacon --job run -- -- {{ ARGS }}
+
+build-sdk-kotlin:
+    cd packages/sdk
+    cargo build --package sdk --release
+    cargo run --bin uniffi-bindgen generate --library target/release/libsdk.so --language kotlin --out-dir ../../target

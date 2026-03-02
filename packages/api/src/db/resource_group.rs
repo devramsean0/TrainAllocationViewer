@@ -4,7 +4,7 @@ pub use crate::db::schema::ResourceGroup;
 
 impl ResourceGroup {
     pub async fn insert(
-        pool: &sqlx::sqlite::SqlitePool,
+        pool: &sqlx::postgres::PgPool,
         rsgrp: ResourceGroup,
     ) -> Result<ResourceGroup, sqlx::Error> {
         let row = sqlx::query_as::<_, ResourceGroup>(
@@ -14,7 +14,7 @@ impl ResourceGroup {
                 resource_type,
                 status,
                 end_of_day_miles
-            ) VALUES (?1, ?2, ?3, ?4? ?5)
+            ) VALUES ($1, $2, $3, $4, $5)
             ON CONFLICT(id) DO UPDATE SET
                 fleet = excluded.fleet,
                 resource_type = excluded.resource_type,

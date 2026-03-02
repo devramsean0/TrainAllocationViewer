@@ -1,11 +1,11 @@
 use rdkafka::config::ClientConfig;
 use rdkafka::consumer::{Consumer, StreamConsumer};
 use rdkafka::Message;
-use sqlx::{Pool, Sqlite};
+use sqlx::{Pool, Postgres};
 
 type CallbackFn = fn(
     m: Vec<u8>,
-    pool: &'static Pool<Sqlite>,
+    pool: &'static Pool<Postgres>,
 ) -> std::pin::Pin<
     Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + 'static>,
 >;
@@ -19,17 +19,17 @@ impl KafkaClient {
     pub fn new(callback: CallbackFn) -> anyhow::Result<Self> {
         let host = std::env::var("KAFKA_HOST")?;
         let group = std::env::var("KAFKA_GROUP")?;
-        let username = std::env::var("KAFKA_USERNAME")?;
-        let password = std::env::var("KAFKA_PASSWORD")?;
+        //let username = std::env::var("KAFKA_USERNAME")?;
+        //let password = std::env::var("KAFKA_PASSWORD")?;
 
         let consumer: StreamConsumer = ClientConfig::new()
             .set("bootstrap.servers", host)
             .set("group.id", group)
             .set("auto.offset.reset", "earliest")
-            .set("security.protocol", "SASL_SSL")
-            .set("sasl.mechanism", "PLAIN")
-            .set("sasl.username", username)
-            .set("sasl.password", password)
+            //.set("security.protocol", "SASL_SSL")
+            //.set("sasl.mechanism", "PLAIN")
+            //.set("sasl.username", username)
+            //.set("sasl.password", password)
             .set("enable.auto.commit", "true")
             .create()?;
 
@@ -42,7 +42,7 @@ impl KafkaClient {
         Ok(())
     }
 
-    pub async fn recv(&self, pool: &'static Pool<Sqlite>) -> anyhow::Result<()> {
+    pub async fn recv(&self, pool: &'static Pool<Postgres>) -> anyhow::Result<()> {
         match self.consumer.recv().await {
             Err(e) => {
                 eprintln!("Kafka error: {}", e);

@@ -4,7 +4,7 @@ pub use crate::db::schema::Vehicle;
 
 impl Vehicle {
     pub async fn insert(
-        pool: &sqlx::sqlite::SqlitePool,
+        pool: &sqlx::postgres::PgPool,
         vehicle: Vehicle,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
@@ -28,7 +28,7 @@ impl Vehicle {
                 category,
                 brake_type,
                 max_speed
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19)
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
             ON CONFLICT(id) DO UPDATE SET
                 livery = excluded.livery,
                 decor = excluded.decor,

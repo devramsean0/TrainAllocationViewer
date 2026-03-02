@@ -1,7 +1,7 @@
 use flate2::read::GzDecoder;
 use log::{debug, info};
 use rdkafka::message::ToBytes;
-use sqlx::{Pool, Sqlite};
+use sqlx::{Pool, Postgres};
 
 use std::io::Read;
 
@@ -17,7 +17,7 @@ async fn decide_on_download() -> anyhow::Result<bool> {
         if std::env::var("ENABLE_CORPUS_UPDATE")? == "true" {
             info!("Downloading because environment variable set");
             let client = S3Client::new()?;
-            let s3_file_head = client.head("CORPUSExtract.json.gz").await?;
+            let s3_file_head = client.head("CORPUSExtract.json.gz".to_string()).await?;
             let s3_md5 = s3_file_head.etag.unwrap().replace("\"", "");
             let md5 = crate::utils::md5::md5_of_file("cache/CORPUSExtract.json.gz").unwrap();
 
@@ -33,10 +33,10 @@ async fn decide_on_download() -> anyhow::Result<bool> {
         Ok(true)
     }
 }
-pub async fn update_corpus(pool: &Pool<Sqlite>) -> anyhow::Result<()> {
+pub async fn update_corpus(pool: &Pool<Postgres>) -> anyhow::Result<()> {
     if decide_on_download().await? {
         let client = S3Client::new()?;
-        let s3_file_body = client.get("CORPUSExtract.json.gz").await?;
+        let s3_file_body = client.get("CORPUSExtract.json.gz".to_string()).await?;
 
         let mut body_stream = s3_file_body.body;
         let mut bytes = Vec::new();
