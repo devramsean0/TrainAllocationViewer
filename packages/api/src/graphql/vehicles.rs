@@ -1,5 +1,5 @@
 use async_graphql::{ComplexObject, Context};
-use sqlx::SqlitePool;
+use sqlx::PgPool;
 
 use crate::db::schema::ResourceGroup;
 pub use crate::db::schema::Vehicle;
@@ -11,9 +11,7 @@ impl Vehicle {
         &self,
         ctx: &Context<'_>,
     ) -> Result<Option<ResourceGroup>, String> {
-        let db = ctx
-            .data::<SqlitePool>()
-            .map_err(|e| e.message.to_string())?;
+        let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
         sqlx::query_as::<_, ResourceGroup>("SELECT * FROM resource_groups WHERE id = $1")
             .bind(&self.resource_group_id)
             .fetch_optional(db)

@@ -1,5 +1,5 @@
 -- Add migration script here
 CREATE TABLE alloc_archive_log(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id BIGSERIAL PRIMARY KEY,
     file_name TEXT NOT NULL UNIQUE
 );

@@ -8,7 +8,7 @@ use axum::{
     Router,
 };
 use log::info;
-use sqlx::SqlitePool;
+use sqlx::PgPool;
 use tokio::{spawn, sync::broadcast::Sender};
 
 pub mod allocation;
@@ -29,7 +29,7 @@ impl Query {
         ctx: &Context<'_>,
         #[graphql(desc = "Filter by NLC")] nlc: Option<String>,
     ) -> Result<Option<Vec<Location>>, String> {
-        let db = match ctx.data::<SqlitePool>() {
+        let db = match ctx.data::<PgPool>() {
             Ok(db) => db,
             Err(err) => return Err(err.message.to_string()),
         };
@@ -51,7 +51,7 @@ impl Query {
         #[graphql(desc = "Filter by ID")] id: Option<String>,
         #[graphql(desc = "Filter by SpecificType")] specific_type: Option<String>,
     ) -> Result<Option<Vec<ResourceGroup>>, String> {
-        let db = match ctx.data::<SqlitePool>() {
+        let db = match ctx.data::<PgPool>() {
             Ok(db) => db,
             Err(err) => return Err(err.message.to_string()),
         };
@@ -84,7 +84,7 @@ impl Query {
         #[graphql(desc = "Filter by Specific Type")] specific_type: Option<String>,
         #[graphql(desc = "Filter by Resource Group ID")] resource_group_id: Option<String>,
     ) -> Result<Option<Vec<Vehicle>>, String> {
-        let db = match ctx.data::<SqlitePool>() {
+        let db = match ctx.data::<PgPool>() {
             Ok(db) => db,
             Err(err) => return Err(err.message.to_string()),
         };
@@ -129,7 +129,7 @@ impl Query {
         #[graphql(desc = "Filter by Resource Group ID")] resource_group_id: Option<String>,
         #[graphql(desc = "Filter by Fleet")] fleet: Option<String>,
     ) -> Result<Option<Vec<Allocation>>, String> {
-        let db = match ctx.data::<SqlitePool>() {
+        let db = match ctx.data::<PgPool>() {
             Ok(db) => db,
             Err(err) => return Err(err.message.to_string()),
         };
@@ -175,7 +175,7 @@ async fn graphiql() -> impl IntoResponse {
     )
 }
 
-pub async fn serve(pool: &SqlitePool, sender: &Sender<()>) -> anyhow::Result<()> {
+pub async fn serve(pool: &PgPool, sender: &Sender<()>) -> anyhow::Result<()> {
     let host = std::env::var("HOST")?;
     let port = std::env::var("GRAPHQL_PORT")?;
 

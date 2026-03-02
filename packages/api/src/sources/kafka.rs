@@ -1,11 +1,11 @@
 use rdkafka::config::ClientConfig;
 use rdkafka::consumer::{Consumer, StreamConsumer};
 use rdkafka::Message;
-use sqlx::{Pool, Sqlite};
+use sqlx::{Pool, Postgres};
 
 type CallbackFn = fn(
     m: Vec<u8>,
-    pool: &'static Pool<Sqlite>,
+    pool: &'static Pool<Postgres>,
 ) -> std::pin::Pin<
     Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + 'static>,
 >;
@@ -42,7 +42,7 @@ impl KafkaClient {
         Ok(())
     }
 
-    pub async fn recv(&self, pool: &'static Pool<Sqlite>) -> anyhow::Result<()> {
+    pub async fn recv(&self, pool: &'static Pool<Postgres>) -> anyhow::Result<()> {
         match self.consumer.recv().await {
             Err(e) => {
                 eprintln!("Kafka error: {}", e);

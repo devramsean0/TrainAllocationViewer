@@ -1,7 +1,7 @@
 use flate2::read::GzDecoder;
 use log::{debug, info};
 use rdkafka::message::ToBytes;
-use sqlx::{Pool, Sqlite};
+use sqlx::{Pool, Postgres};
 
 use std::io::Read;
 
@@ -33,7 +33,7 @@ async fn decide_on_download() -> anyhow::Result<bool> {
         Ok(true)
     }
 }
-pub async fn update_corpus(pool: &Pool<Sqlite>) -> anyhow::Result<()> {
+pub async fn update_corpus(pool: &Pool<Postgres>) -> anyhow::Result<()> {
     if decide_on_download().await? {
         let client = S3Client::new()?;
         let s3_file_body = client.get("CORPUSExtract.json.gz".to_string()).await?;

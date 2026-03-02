@@ -1,10 +1,10 @@
 use crate::db::schema::{Allocation, ResourceGroup, Vehicle};
 use log::info;
 use rdkafka::message::ToBytes;
-use sqlx::{Pool, Sqlite};
+use sqlx::{Pool, Postgres};
 use tokio::{spawn, sync::broadcast::Sender};
 
-pub async fn init(pool: &'static Pool<Sqlite>, sender: &Sender<()>) -> anyhow::Result<()> {
+pub async fn init(pool: &'static Pool<Postgres>, sender: &Sender<()>) -> anyhow::Result<()> {
     if std::env::var("ENABLE_ALLOCCONSIST_UPDATE")? == "true" {
         let mut shutdown = sender.subscribe();
 
@@ -42,7 +42,7 @@ pub async fn init(pool: &'static Pool<Sqlite>, sender: &Sender<()>) -> anyhow::R
 
 pub fn callback(
     msg: Vec<u8>,
-    pool: &'static sqlx::SqlitePool,
+    pool: &'static sqlx::PgPool,
 ) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<()>> + Send + 'static>> {
     Box::pin(async move {
         let parsed = crate::payload::handle_payload(msg.to_bytes())?;

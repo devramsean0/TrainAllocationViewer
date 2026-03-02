@@ -4,7 +4,7 @@ pub use crate::db::schema::Allocation;
 
 impl Allocation {
     pub async fn insert(
-        pool: &sqlx::sqlite::SqlitePool,
+        pool: &sqlx::postgres::PgPool,
         alloc: Allocation,
     ) -> Result<(), sqlx::Error> {
         let row = sqlx::query_as::<_, Allocation>(
@@ -37,7 +37,7 @@ impl Allocation {
                 origin_miles,
                 destination_miles,
                 reversed
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28)
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
             RETURNING
                 id,
                 origin_datetime,
@@ -102,7 +102,7 @@ impl Allocation {
         Ok(())
     }
 
-    pub async fn count(pool: &sqlx::sqlite::SqlitePool) -> Result<i64, sqlx::Error> {
+    pub async fn count(pool: &sqlx::postgres::PgPool) -> Result<i64, sqlx::Error> {
         let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM allocations;")
             .fetch_one(pool)
             .await?;

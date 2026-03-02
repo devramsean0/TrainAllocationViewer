@@ -1,6 +1,6 @@
 -- Add migration script here
 CREATE TABLE allocations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id BIGSERIAL PRIMARY KEY,
     origin_datetime TEXT NOT NULL,
     origin_location TEXT NOT NULL,
     date TEXT,

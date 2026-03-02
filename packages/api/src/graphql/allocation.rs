@@ -1,5 +1,5 @@
 use async_graphql::{ComplexObject, Context};
-use sqlx::SqlitePool;
+use sqlx::PgPool;
 
 pub use crate::db::schema::Allocation;
 use crate::db::schema::{Location, ResourceGroup};
@@ -8,10 +8,8 @@ use crate::db::schema::{Location, ResourceGroup};
 impl Allocation {
     #[graphql(name = "originLocation")]
     async fn origin_location_detail(&self, ctx: &Context<'_>) -> Result<Option<Location>, String> {
-        let db = ctx
-            .data::<SqlitePool>()
-            .map_err(|e| e.message.to_string())?;
-        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE id = $1")
+        let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
+        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE nlc = $1")
             .bind(&self.origin_location)
             .fetch_optional(db)
             .await
@@ -20,10 +18,8 @@ impl Allocation {
 
     #[graphql(name = "destLocation")]
     async fn dest_location_detail(&self, ctx: &Context<'_>) -> Result<Option<Location>, String> {
-        let db = ctx
-            .data::<SqlitePool>()
-            .map_err(|e| e.message.to_string())?;
-        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE id = $1")
+        let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
+        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE nlc = $1")
             .bind(&self.dest_location)
             .fetch_optional(db)
             .await
@@ -35,10 +31,8 @@ impl Allocation {
         &self,
         ctx: &Context<'_>,
     ) -> Result<Option<Location>, String> {
-        let db = ctx
-            .data::<SqlitePool>()
-            .map_err(|e| e.message.to_string())?;
-        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE id = $1")
+        let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
+        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE nlc = $1")
             .bind(&self.allocation_origin_location)
             .fetch_optional(db)
             .await
@@ -50,10 +44,8 @@ impl Allocation {
         &self,
         ctx: &Context<'_>,
     ) -> Result<Option<Location>, String> {
-        let db = ctx
-            .data::<SqlitePool>()
-            .map_err(|e| e.message.to_string())?;
-        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE id = $1")
+        let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
+        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE nlc = $1")
             .bind(&self.allocation_dest_location)
             .fetch_optional(db)
             .await
@@ -65,9 +57,7 @@ impl Allocation {
         &self,
         ctx: &Context<'_>,
     ) -> Result<Option<ResourceGroup>, String> {
-        let db = ctx
-            .data::<SqlitePool>()
-            .map_err(|e| e.message.to_string())?;
+        let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
         sqlx::query_as::<_, ResourceGroup>("SELECT * FROM resource_groups WHERE id = $1")
             .bind(&self.resource_group_id)
             .fetch_optional(db)

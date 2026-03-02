@@ -1,4 +1,6 @@
 use log::info;
+use sqlx::postgres::PgConnectOptions;
+use std::str::FromStr;
 use tokio::{signal, sync::broadcast};
 
 use crate::jobs::init_scheduler;
@@ -16,8 +18,11 @@ async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    let pool: &'static sqlx::sqlite::SqlitePool = Box::leak(Box::new(
-        sqlx::sqlite::SqlitePool::connect("sqlite:data.db").await?,
+    let database_url = std::env::var("DATABASE_URL")?;
+    let options =
+        PgConnectOptions::from_str(&database_url)?.ssl_mode(sqlx::postgres::PgSslMode::Disable);
+    let pool: &'static sqlx::postgres::PgPool = Box::leak(Box::new(
+        sqlx::postgres::PgPool::connect_with(options).await?,
     ));
     info!("Running database migrations...");
     sqlx::migrate!().run(pool).await?;

@@ -31,7 +31,7 @@ async fn decide_on_download(file: String) -> anyhow::Result<bool> {
         Ok(true)
     }
 }
-pub async fn download_archive(pool: &'static sqlx::SqlitePool) -> anyhow::Result<()> {
+pub async fn download_archive(pool: &'static sqlx::PgPool) -> anyhow::Result<()> {
     spawn(async move {
         let client = S3Client::new().unwrap();
         let files = client.listv2("passenger-consist-").await.unwrap();
