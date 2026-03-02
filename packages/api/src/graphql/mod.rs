@@ -50,28 +50,48 @@ impl Query {
         ctx: &Context<'_>,
         #[graphql(desc = "Filter by ID")] id: Option<String>,
         #[graphql(desc = "Filter by SpecificType")] specific_type: Option<String>,
+        #[graphql(desc = "Only show unique fleets")] unique_fleet: Option<bool>,
     ) -> Result<Option<Vec<ResourceGroup>>, String> {
         let db = match ctx.data::<PgPool>() {
             Ok(db) => db,
             Err(err) => return Err(err.message.to_string()),
         };
 
-        let res = match sqlx::query_as::<_, ResourceGroup>(
-            "
-            SELECT * FROM resource_groups
-                WHERE (CASE WHEN $1 IS NOT NULL THEN (id = $1) ELSE (id = id) END)
-                AND (CASE WHEN $2 IS NOT NULL THEN (fleet = $2) ELSE (fleet = fleet) END)
-            ;",
-        )
-        .bind(id)
-        .bind(specific_type)
-        .fetch_all(db)
-        .await
-        {
-            Ok(res) => res,
-            Err(err) => return Err(err.to_string()),
-        };
-        Ok(Some(res))
+        if unique_fleet == Some(true) {
+            let res = match sqlx::query_as::<_, ResourceGroup>(
+                "
+                SELECT DISTINCT ON (FLEET) * FROM resource_groups
+                    WHERE (CASE WHEN $1 IS NOT NULL THEN (id = $1) ELSE (id = id) END)
+                    AND (CASE WHEN $2 IS NOT NULL THEN (fleet = $2) ELSE (fleet = fleet) END)
+                ;",
+            )
+            .bind(id)
+            .bind(specific_type)
+            .fetch_all(db)
+            .await
+            {
+                Ok(res) => res,
+                Err(err) => return Err(err.to_string()),
+            };
+            Ok(Some(res))
+        } else {
+            let res = match sqlx::query_as::<_, ResourceGroup>(
+                "
+                SELECT * FROM resource_groups
+                    WHERE (CASE WHEN $1 IS NOT NULL THEN (id = $1) ELSE (id = id) END)
+                    AND (CASE WHEN $2 IS NOT NULL THEN (fleet = $2) ELSE (fleet = fleet) END)
+                ;",
+            )
+            .bind(id)
+            .bind(specific_type)
+            .fetch_all(db)
+            .await
+            {
+                Ok(res) => res,
+                Err(err) => return Err(err.to_string()),
+            };
+            Ok(Some(res))
+        }
     }
 
     async fn vehicles(

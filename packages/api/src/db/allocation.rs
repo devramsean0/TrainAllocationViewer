@@ -38,6 +38,30 @@ impl Allocation {
                 destination_miles,
                 reversed
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
+            ON CONFLICT (origin_datetime, origin_location, dest_datetime, dest_location, resource_group_id) DO UPDATE SET
+                origin_country_code_iso = EXCLUDED.origin_country_code_iso,
+                origin_subsidiary_information_code = EXCLUDED.origin_subsidiary_information_code,
+                origin_subsidiary_information_company = EXCLUDED.origin_subsidiary_information_company,
+                date = EXCLUDED.date,
+                dest_country_code_iso = EXCLUDED.dest_country_code_iso,
+                dest_subsidiary_information_code = EXCLUDED.dest_subsidiary_information_code,
+                dest_subsidiary_information_company = EXCLUDED.dest_subsidiary_information_company,
+                allocation_origin_datetime = EXCLUDED.allocation_origin_datetime,
+                allocation_origin_location = EXCLUDED.allocation_origin_location,
+                allocation_origin_country_code_iso = EXCLUDED.allocation_origin_country_code_iso,
+                allocation_origin_subsidiary_information_code = EXCLUDED.allocation_origin_subsidiary_information_code,
+                allocation_origin_subsidiary_information_company = EXCLUDED.allocation_origin_subsidiary_information_company,
+                allocation_dest_datetime = EXCLUDED.allocation_dest_datetime,
+                allocation_dest_location = EXCLUDED.allocation_dest_location,
+                allocation_dest_country_code_iso = EXCLUDED.allocation_dest_country_code_iso,
+                allocation_dest_subsidiary_information_code = EXCLUDED.allocation_dest_subsidiary_information_code,
+                allocation_dest_subsidiary_information_company = EXCLUDED.allocation_dest_subsidiary_information_company,
+                sequence_number = EXCLUDED.sequence_number,
+                resource_group_position = EXCLUDED.resource_group_position,
+                diagram_no = EXCLUDED.diagram_no,
+                origin_miles = EXCLUDED.origin_miles,
+                destination_miles = EXCLUDED.destination_miles,
+                reversed = EXCLUDED.reversed
             RETURNING
                 id,
                 origin_datetime,

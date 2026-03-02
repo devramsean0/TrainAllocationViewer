@@ -247,7 +247,7 @@ pub async fn download_archive(pool: &'static sqlx::PgPool) -> anyhow::Result<()>
                             message_count += 1;
                             file_message_count += 1;
                             if message_count % 1000 == 0 {
-                                info!("Processed 1000 messages ({message_count}) (file: {file_message_count}");
+                                info!("Processed 1000 messages ({message_count}) (file: {file_message_count})");
                             }
                         }
                     }
