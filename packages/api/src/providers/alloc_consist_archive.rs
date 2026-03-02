@@ -36,6 +36,7 @@ pub async fn download_archive(pool: &'static sqlx::SqlitePool) -> anyhow::Result
         let client = S3Client::new().unwrap();
         let files = client.listv2("passenger-consist-").await.unwrap();
 
+        let mut message_count: i128 = 0;
         for file in files.contents {
             let file_key: String = file.key.clone();
             let db = AllocArchiveLog::get_by_filename(pool, file_key.clone()).await;
@@ -227,6 +228,10 @@ pub async fn download_archive(pool: &'static sqlx::SqlitePool) -> anyhow::Result
                                     .await
                                     .unwrap();
                                 }
+                            }
+                            message_count += 1;
+                            if message_count % 1000 == 0 {
+                                info!("Processed 1000 messages ({message_count})");
                             }
                         }
                     }
