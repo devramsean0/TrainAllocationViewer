@@ -14,7 +14,8 @@ export async function retrieveAllocationList(fleet: string, date: string, origin
                         id,
                         originLocation {
                             crs,
-                            nlc
+                            nlc,
+                            uic
                         }
                         originDatetime,
                         resourceGroup {
@@ -23,7 +24,7 @@ export async function retrieveAllocationList(fleet: string, date: string, origin
                         destLocation {
                             crs,
                             nlc,
-                            uic,
+                            uic
                         },
                         destDatetime
                     }
@@ -60,13 +61,15 @@ interface AllocationList {
     destDatetime: string,
     destLocation: {
         crs: string | undefined,
-        nlc: string
+        uic: string | undefined,
+        nlc: string | undefined
     },
     resourceGroup: {
         id: String
     },
     originLocation: {
         crs: string | undefined,
-        nlc: string
+        uic: string | undefined,
+        nlc: string | undefined
     }
 }

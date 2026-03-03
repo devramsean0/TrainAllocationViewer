@@ -30,7 +30,7 @@ const { fleet, date, origin_location, dest_location } = params;
 let allocations = await retrieveAllocationList(fleet, date, origin_location, dest_location);
 ---
 <Layout title="Relevant Trains">
-	<main class="w-1/3 h-1/2 items-center">
+	<main class="w-1/2 h-1/2 items-center">
     	<Card className="flex-none">
 			<CardHeader>
 				<CardTitle>Trains</CardTitle>
@@ -49,8 +49,8 @@ let allocations = await retrieveAllocationList(fleet, date, origin_location, des
                         {allocations.map((allocation) => (
                             <TableRow key={allocation.id}>
                                 <TableCell className="font-medium">{allocation.resourceGroup.id}</TableCell>
-                                <TableCell>{ allocation.originLocation.crs == " " ? allocation.originLocation.crs : allocation.originLocation.uic}</TableCell>
-                                <TableCell>{ allocation.destLocation.crs == " " ? allocation.destLocation.crs : allocation.destLocation.uic}</TableCell>
+                                <TableCell>{ allocation.originLocation.crs != " " ? `${allocation.originLocation.crs} (crs)` : (allocation.originLocation.uic != " " ? `${allocation.originLocation.uic} (uic)` : `${allocation.originLocation.nlc} (nlc)`) }</TableCell>
+                                <TableCell>{ allocation.destLocation.crs != " " ? `${allocation.destLocation.crs} (crs)` : (allocation.destLocation.uic != " " ? `${allocation.destLocation.uic} (uic)` : `${allocation.destLocation.nlc} (nlc)`) }</TableCell>
                                 <TableCell>
                                     <a href={`/train/${allocation.id}`}>
                                         <Button>More details</Button>
