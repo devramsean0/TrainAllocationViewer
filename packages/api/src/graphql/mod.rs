@@ -166,7 +166,7 @@ impl Query {
                 AND (CASE WHEN $6 IS NOT NULL THEN (allocations.allocation_dest_location = $6) ELSE (allocations.allocation_dest_location = allocations.allocation_dest_location) END)
                 AND (CASE WHEN $7 IS NOT NULL THEN (allocations.resource_group_id = $7) ELSE (allocations.resource_group_id = allocations.resource_group_id) END)
                 AND (CASE WHEN $8 IS NOT NULL THEN (resource_groups.fleet = $8) ELSE (resource_groups.fleet = resource_groups.fleet OR resource_groups.fleet IS NULL) END)
-            ;",
+        LIMIT 30;",
         )
         .bind(id)
         .bind(date)

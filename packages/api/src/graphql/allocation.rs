@@ -9,7 +9,7 @@ impl Allocation {
     #[graphql(name = "originLocation")]
     async fn origin_location_detail(&self, ctx: &Context<'_>) -> Result<Option<Location>, String> {
         let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
-        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE nlc = $1")
+        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE uic = $1 OR nlc = $1")
             .bind(&self.origin_location)
             .fetch_optional(db)
             .await
@@ -19,7 +19,7 @@ impl Allocation {
     #[graphql(name = "destLocation")]
     async fn dest_location_detail(&self, ctx: &Context<'_>) -> Result<Option<Location>, String> {
         let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
-        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE nlc = $1")
+        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE uic = $1 OR nlc = $1")
             .bind(&self.dest_location)
             .fetch_optional(db)
             .await
@@ -32,7 +32,7 @@ impl Allocation {
         ctx: &Context<'_>,
     ) -> Result<Option<Location>, String> {
         let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
-        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE nlc = $1")
+        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE uic = $1")
             .bind(&self.allocation_origin_location)
             .fetch_optional(db)
             .await
@@ -45,7 +45,7 @@ impl Allocation {
         ctx: &Context<'_>,
     ) -> Result<Option<Location>, String> {
         let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
-        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE nlc = $1")
+        sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE uic = $1")
             .bind(&self.allocation_dest_location)
             .fetch_optional(db)
             .await

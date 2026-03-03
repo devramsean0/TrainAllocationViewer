@@ -1,0 +1,66 @@
+---
+export const prerender = false;
+
+import Layout from '@/layouts/layout.astro';
+import { retrieveAllocationList } from '@/lib/api.ts';
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
+let params = {};
+for (const [key, value] of Astro.url.searchParams.entries()) {
+  params[key] = value;
+}
+const { fleet, date, origin_location, dest_location } = params;
+
+let allocations = await retrieveAllocationList(fleet, date, origin_location, dest_location);
+---
+<Layout title="Relevant Trains">
+	<main class="w-1/3 h-1/2 items-center">
+    	<Card className="flex-none">
+			<CardHeader>
+				<CardTitle>Trains</CardTitle>
+				<CardDescription>All the trains that meet your criteria</CardDescription>
+			</CardHeader>
+			<CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[100px]">Train ID</TableHead>
+                            <TableHead>Origin</TableHead>
+                            <TableHead>Destination</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {allocations.map((allocation) => (
+                            <TableRow key={allocation.id}>
+                                <TableCell className="font-medium">{allocation.resourceGroup.id}</TableCell>
+                                <TableCell>{ allocation.originLocation.crs == " " ? allocation.originLocation.crs : allocation.originLocation.uic}</TableCell>
+                                <TableCell>{ allocation.destLocation.crs == " " ? allocation.destLocation.crs : allocation.destLocation.uic}</TableCell>
+                                <TableCell>
+                                    <a href={`/train/${allocation.id}`}>
+                                        <Button>More details</Button>
+                                    </a>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+		</Card>
+    </main>
+</Layout>
