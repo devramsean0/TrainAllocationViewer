@@ -17,7 +17,6 @@ export async function retrieveAllocationList(fleet: string, date: string, origin
                             nlc,
                             uic
                         }
-                        originDatetime,
                         resourceGroup {
                             id,
                         },
@@ -26,7 +25,6 @@ export async function retrieveAllocationList(fleet: string, date: string, origin
                             nlc,
                             uic
                         },
-                        destDatetime
                     }
                 }
             `,

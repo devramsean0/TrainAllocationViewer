@@ -23,9 +23,12 @@ import {
 
 let params = {};
 for (const [key, value] of Astro.url.searchParams.entries()) {
-  params[key] = value;
+    if (value != "") {
+        params[key] = value;
+    }
 }
 const { fleet, date, origin_location, dest_location } = params;
+//console.log(params)
 
 let allocations = await retrieveAllocationList(fleet, date, origin_location, dest_location);
 ---
