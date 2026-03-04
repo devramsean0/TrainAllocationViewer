@@ -1,0 +1,151 @@
+---
+import Layout from '@/layouts/layout.astro';
+import { retrieveAllocation } from '@/lib/api.ts';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import Icon from "@hackclub/icons";
+
+const { id } = Astro.params
+export const prerender = false;
+
+const allocation = await retrieveAllocation(Number.parseInt(id!))
+
+if (allocation.length == 0) {
+    return new Response("no allocations found", {
+        status: 404
+    })
+}
+const alloc = allocation[0]
+---
+<Layout title={`Train ${id}`}>
+    <main class="grid grid-cols-3 gap-2">
+        <section class="flex flex-col gap-4">
+            {typeof alloc.resourceGroup == "object" &&
+                <Card className="flex-none">
+                    <CardHeader>
+                        <CardTitle>Resource Group</CardTitle>
+                        <CardDescription>Information about the Train Set/Resource Group</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ul>
+                            {typeof alloc.resourceGroup?.id == "string" && <li>ID: {alloc.resourceGroup?.id}</li> }
+                            {typeof alloc.resourceGroup?.fleet == "string" && <li>Fleet: {alloc.resourceGroup?.fleet}</li> }
+                            {typeof alloc.resourceGroup?.resourceType == "string" && <li>Resource Type: {alloc.resourceGroup?.resourceType}</li> }
+                            {typeof alloc.resourceGroup?.status == "string" && <li>Status: {alloc.resourceGroup?.status}</li> }
+                            {typeof alloc.resourceGroup?.endOfDayMiles == "string" && <li>End of Day Miles: {alloc.resourceGroup?.endOfDayMiles}</li> }
+                        </ul>
+                    </CardContent>
+                </Card>
+            }
+            <Card className="flex-none">
+                <CardHeader>
+                    <CardTitle>Misc Details</CardTitle>
+                    <CardDescription>Miscalanious data about this allocation</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ul>
+                        {typeof alloc.sequenceNumber == "number" && <li>Sequence Number: {alloc.sequenceNumber}</li> }
+                        {typeof alloc.resourceGroupPosition == "number" && <li>Resource Group Position: {alloc.resourceGroupPosition}</li> }
+                        {typeof alloc.diagramNo == "string" && <li>Diagram No: {alloc.diagramNo}</li> }
+                        {typeof alloc.originMiles == "number" && <li>Origin Miles: {alloc.originMiles}</li> }
+                        {typeof alloc.destinationMiles == "number" && <li>Destination Miles: {alloc.destinationMiles}</li> }
+                        {typeof alloc.reversed == "string" && <li>Reversed: {alloc.reversed}</li> }
+                    </ul>
+                </CardContent>
+            </Card>
+        </section>
+        <section class="col-span-2 flex flex-row gap-4">
+            {(typeof alloc.originLocation == "object" && typeof alloc.destLocation == "object") &&
+                <Card className="flex-none w-1/2">
+                    <CardHeader>
+                        <CardTitle>Route</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-row justify-between items-center">
+                        {typeof alloc.originLocation == "object" ?
+                            <ul>
+                                {(typeof alloc.originLocation?.nlcdesc == "string" && alloc.originLocation?.nlcdesc != " ") && <li>{alloc.originLocation?.nlcdesc}</li> }
+                                {(typeof alloc.originLocation?.nlcdesc16 == "string" && alloc.originLocation?.nlcdesc16 != " ") && <li>{alloc.originLocation?.nlcdesc16}</li> }
+                                {(typeof alloc.originLocation?.crs == "string" && alloc.originLocation?.crs != " ") && <li>{alloc.originLocation?.crs}</li> }
+                                {(typeof alloc.originLocation?.uic == "string" && alloc.originLocation?.uic != " ") && <li>{alloc.originLocation?.uic} (uic)</li> }
+                                {(typeof alloc.originLocation?.nlc == "string" && alloc.originLocation?.nlc != " ") && <li>{alloc.originLocation?.nlc} (nlc)</li> }
+                                {(typeof alloc.originLocation?.stanox == "string" && alloc.originLocation?.stanox != " ") && <li>{alloc.originLocation?.stanox}</li> }
+                                {(typeof alloc.originLocation?.tiploc == "string" && alloc.originLocation?.tiploc != " ") && <li>{alloc.originLocation?.tiploc}</li> }
+                                {(typeof alloc.originLocation?.axis == "string" && alloc.originLocation?.axis != " ") && <li>{alloc.originLocation?.axis}</li> }
+                            </ul>
+                        : <div>
+                            <Icon glyph='info' size={64} />
+                            This service doesn't have a origin set :(
+                            </div>
+                        }
+                        <Icon glyph='enter' size={64}/>
+                        {typeof alloc.destLocation == "object" ?
+                            <ul>
+                                {(typeof alloc.destLocation?.nlcdesc == "string" && alloc.destLocation?.nlcdesc != " ") && <li>{alloc.destLocation?.nlcdesc}</li> }
+                                {(typeof alloc.destLocation?.nlcdesc16 == "string" && alloc.destLocation?.nlcdesc16 != " ") && <li>{alloc.destLocation?.nlcdesc16}</li> }
+                                {(typeof alloc.destLocation?.crs == "string" && alloc.destLocation?.crs != " ") && <li>{alloc.destLocation?.crs}</li> }
+                                {(typeof alloc.destLocation?.uic == "string" && alloc.destLocation?.uic != " ") && <li>{alloc.destLocation?.uic} (uic)</li> }
+                                {(typeof alloc.destLocation?.nlc == "string" && alloc.destLocation?.nlc != " ") && <li>{alloc.destLocation?.nlc} (nlc)</li> }
+                                {(typeof alloc.destLocation?.stanox == "string" && alloc.destLocation?.stanox != " ") && <li>{alloc.destLocation?.stanox}</li> }
+                                {(typeof alloc.destLocation?.tiploc == "string" && alloc.destLocation?.tiploc != " ") && <li>{alloc.destLocation?.tiploc}</li> }
+                                {(typeof alloc.destLocation?.axis == "string" && alloc.destLocation?.axis != " ") && <li>{alloc.destLocation?.axis}</li> }
+                            </ul>
+                        : <div>
+                            <Icon glyph='info' size={64} />
+                            This service doesn't have a destination set :(
+                            </div>
+                        }
+                    </CardContent>
+                </Card>
+            }
+            {(typeof alloc.allocationOriginLocation == "object" && typeof alloc.allocationDestLocation == "object") &&
+                <Card className="flex-none w-1/2">
+                    <CardHeader>
+                        <CardTitle>Allocation Route</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-row justify-between items-center">
+                        {typeof alloc.originLocation == "object" ?
+                            <ul>
+                                {(typeof alloc.allocationOriginLocation?.nlcdesc == "string" && alloc.allocationOriginLocation?.nlcdesc != " ") && <li>{alloc.allocationOriginLocation?.nlcdesc}</li> }
+                                {(typeof alloc.allocationOriginLocation?.nlcdesc16 == "string" && alloc.allocationOriginLocation?.nlcdesc16 != " ") && <li>{alloc.allocationOriginLocation?.nlcdesc16}</li> }
+                                {(typeof alloc.allocationOriginLocation?.crs == "string" && alloc.allocationOriginLocation?.crs != " ") && <li>{alloc.allocationOriginLocation?.crs}</li> }
+                                {(typeof alloc.allocationOriginLocation?.uic == "string" && alloc.allocationOriginLocation?.uic != " ") && <li>{alloc.allocationOriginLocation?.uic} (uic)</li> }
+                                {(typeof alloc.allocationOriginLocation?.nlc == "string" && alloc.allocationOriginLocation?.nlc != " ") && <li>{alloc.allocationOriginLocation?.nlc} (nlc)</li> }
+                                {(typeof alloc.allocationOriginLocation?.stanox == "string" && alloc.allocationOriginLocation?.stanox != " ") && <li>{alloc.allocationOriginLocation?.stanox}</li> }
+                                {(typeof alloc.allocationOriginLocation?.tiploc == "string" && alloc.allocationOriginLocation?.tiploc != " ") && <li>{alloc.allocationOriginLocation?.tiploc}</li> }
+                                {(typeof alloc.allocationOriginLocation?.axis == "string" && alloc.allocationOriginLocation?.axis != " ") && <li>{alloc.allocationOriginLocation?.axis}</li> }
+                            </ul>
+                        : <div>
+                            <Icon glyph='info' size={64} />
+                            This service doesn't have a origin set :(
+                            </div>
+                        }
+                        <Icon glyph='enter' size={64}/>
+                        {typeof alloc.destLocation == "object" ?
+                            <ul>
+                                {(typeof alloc.allocationDestLocation?.nlcdesc == "string" && alloc.allocationDestLocation?.nlcdesc != " ") && <li>{alloc.allocationDestLocation?.nlcdesc}</li> }
+                                {(typeof alloc.allocationDestLocation?.nlcdesc16 == "string" && alloc.allocationDestLocation?.nlcdesc16 != " ") && <li>{alloc.allocationDestLocation?.nlcdesc16}</li> }
+                                {(typeof alloc.allocationDestLocation?.crs == "string" && alloc.allocationDestLocation?.crs != " ") && <li>{alloc.allocationDestLocation?.crs}</li> }
+                                {(typeof alloc.allocationDestLocation?.uic == "string" && alloc.allocationDestLocation?.uic != " ") && <li>{alloc.allocationDestLocation?.uic} (uic)</li> }
+                                {(typeof alloc.allocationDestLocation?.nlc == "string" && alloc.allocationDestLocation?.nlc != " ") && <li>{alloc.allocationDestLocation?.nlc} (nlc)</li> }
+                                {(typeof alloc.allocationDestLocation?.stanox == "string" && alloc.allocationDestLocation?.stanox != " ") && <li>{alloc.allocationDestLocation?.stanox}</li> }
+                                {(typeof alloc.allocationDestLocation?.tiploc == "string" && alloc.allocationDestLocation?.tiploc != " ") && <li>{alloc.allocationDestLocation?.tiploc}</li> }
+                                {(typeof alloc.allocationDestLocation?.axis == "string" && alloc.allocationDestLocation?.axis != " ") && <li>{alloc.allocationDestLocation?.axis}</li> }
+                            </ul>
+                        : <div>
+                            <Icon glyph='info' size={64} />
+                            This service doesn't have a destination set :(
+                            </div>
+                        }
+                    </CardContent>
+                </Card>
+            }
+        </section>
+    </main>
+</Layout>

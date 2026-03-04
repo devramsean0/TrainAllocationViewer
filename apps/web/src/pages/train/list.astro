@@ -33,37 +33,45 @@ const { fleet, date, origin_location, dest_location } = params;
 let allocations = await retrieveAllocationList(fleet, date, origin_location, dest_location);
 ---
 <Layout title="Relevant Trains">
-	<main class="w-1/2 h-1/2 items-center">
-    	<Card className="flex-none">
-			<CardHeader>
-				<CardTitle>Trains</CardTitle>
-				<CardDescription>All the trains that meet your criteria</CardDescription>
-			</CardHeader>
-			<CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Train ID</TableHead>
-                            <TableHead>Origin</TableHead>
-                            <TableHead>Destination</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {allocations.map((allocation) => (
-                            <TableRow key={allocation.id}>
-                                <TableCell className="font-medium">{allocation.resourceGroup.id}</TableCell>
-                                <TableCell>{ allocation.originLocation.crs != " " ? `${allocation.originLocation.crs} (crs)` : (allocation.originLocation.uic != " " ? `${allocation.originLocation.uic} (uic)` : `${allocation.originLocation.nlc} (nlc)`) }</TableCell>
-                                <TableCell>{ allocation.destLocation.crs != " " ? `${allocation.destLocation.crs} (crs)` : (allocation.destLocation.uic != " " ? `${allocation.destLocation.uic} (uic)` : `${allocation.destLocation.nlc} (nlc)`) }</TableCell>
-                                <TableCell>
-                                    <a href={`/train/${allocation.id}`}>
-                                        <Button>More details</Button>
-                                    </a>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </CardContent>
-		</Card>
-    </main>
+    <div class="flex flex-row justify-center items-center">
+        <main class="w-1/2 h-1/2 items-center">
+            <Card className="flex-none">
+                { allocations.length == 0 ?
+                    <CardContent>
+                        
+                    </CardContent>
+                :
+                    <CardHeader>
+                        <CardTitle>Trains</CardTitle>
+                        <CardDescription>All the trains that meet your criteria</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[100px]">Train ID</TableHead>
+                                    <TableHead>Origin</TableHead>
+                                    <TableHead>Destination</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {allocations.map((allocation) => (
+                                    <TableRow key={allocation.id}>
+                                        <TableCell className="font-medium">{allocation.resourceGroup.id}</TableCell>
+                                        <TableCell>{ allocation.originLocation.crs != " " ? `${allocation.originLocation.crs} (crs)` : (allocation.originLocation.uic != " " ? `${allocation.originLocation.uic} (uic)` : `${allocation.originLocation.nlc} (nlc)`) }</TableCell>
+                                        <TableCell>{ allocation.destLocation.crs != " " ? `${allocation.destLocation.crs} (crs)` : (allocation.destLocation.uic != " " ? `${allocation.destLocation.uic} (uic)` : `${allocation.destLocation.nlc} (nlc)`) }</TableCell>
+                                        <TableCell>
+                                            <a href={`/train/${allocation.id}`}>
+                                                <Button>More details</Button>
+                                            </a>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                }
+            </Card>
+        </main>
+    </div>
 </Layout>
