@@ -23,6 +23,21 @@ pub async fn init_scheduler() -> anyhow::Result<()> {
         })?)
         .await?;
 
+    sched
+        .add(Job::new_async("0 0 0 * * *", |uuid, _l| {
+            Box::pin(async move {
+                let database_url = std::env::var("DATABASE_URL").unwrap();
+                let options = PgConnectOptions::from_str(&database_url)
+                    .unwrap()
+                    .ssl_mode(PgSslMode::Disable);
+                let pool: postgres::PgPool = postgres::PgPool::connect_with(options).await.unwrap();
+                info!("[{uuid} Running BPLAN Update Job");
+
+                crate::providers::bplan::update_bplan(&pool).await.unwrap();
+            })
+        })?)
+        .await?;
+
     sched.shutdown_on_ctrl_c();
     sched.set_shutdown_handler(Box::new(|| {
         Box::pin(async move { info!("Job Scheduler Shut Down") })

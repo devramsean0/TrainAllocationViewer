@@ -28,6 +28,7 @@ async fn main() -> anyhow::Result<()> {
     sqlx::migrate!().run(pool).await?;
     info!("Database migrations completed successfully");
     providers::corpus::update_corpus(pool).await?;
+    providers::bplan::update_bplan(pool).await?;
 
     init_scheduler().await?;
 

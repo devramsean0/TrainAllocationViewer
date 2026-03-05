@@ -92,3 +92,26 @@ pub struct AllocArchiveLog {
     pub id: Option<i64>,
     pub file_name: String,
 }
+
+#[derive(Debug, Clone, FromRow)]
+pub struct BplanLog {
+    pub id: Option<i64>,
+    pub file_version: String,
+    pub source_system: String,
+    pub toc_id: String,
+    pub timetable_start_date: String,
+    pub timetable_end_date: String,
+    pub cycle_type: String,
+    pub cycle_stage: String,
+    pub creation_date: String,
+    pub sequence_number: i32,
+}
+
+#[derive(Debug, Clone, FromRow)]
+pub struct ReferenceCode {
+    pub id: Option<i64>,
+    pub action_code: String,
+    pub code_type: String,
+    pub code: Option<String>,
+    pub description: String,
+}
