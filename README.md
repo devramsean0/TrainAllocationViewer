@@ -6,6 +6,7 @@ flowchart LR
     KafkaProxy1[Kafka Proxy] -->|Kafka| API
     TrainConsistArchive[Train Consist & Allocations Archive] -->|S3| API
     CORPUSData[Corpus Location Data] -->|S3| API
+    BPLANData[BPLAN Data] -->|S3| API
 
     API -->|GraphQL|AndroidApp[Android App]
     API -->|GraphQL|Web[Website]
