@@ -1,6 +1,10 @@
 
 name: CI
 
+on:
+  push:
+    - main
+
 jobs:
     build:
         name: Build and Push Docker Image
