@@ -12,7 +12,7 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
           contents: read
-          issues: write
+          packages: write
         steps:
             - uses: actions/checkout@v2
             - name: Log in to GitHub Container Registry
