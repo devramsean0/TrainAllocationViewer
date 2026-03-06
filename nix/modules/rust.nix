@@ -26,7 +26,7 @@
           ) ++ [ pkgs.openssl (pkgs.callPackage ../packages/librdkafka.nix { }) ];
         nativeBuildInputs = [ pkgs.pkg-config ];
       };
-      path = ../../packages/api;
+      path = ../../services/api;
     };
 
     rust-project.crates."kafkaproxy" = {
@@ -39,7 +39,7 @@
           ) ++ [ pkgs.openssl (pkgs.callPackage ../packages/librdkafka.nix { }) ];
         nativeBuildInputs = [ pkgs.pkg-config ];
       };
-      path = ../../packages/kafkaproxy;
+      path = ../../services/kafkaproxy;
     };
     packages.default = self'.packages.train-allocation-viewer;
   };
