@@ -33,7 +33,7 @@ if (allocation.length == 0) {
 const alloc = allocation[0]
 ---
 <Layout title={`Train ${id}`}>
-    <main class="grid grid-cols-3 gap-2 min-h-screen">
+    <main class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-2 min-h-screen">
         <section class="flex flex-col gap-4">
             {typeof alloc.resourceGroup == "object" &&
                 <Card className="flex-none">
@@ -70,9 +70,9 @@ const alloc = allocation[0]
             </Card>
         </section>
         <section class="col-span-2 flex flex-col gap-4 max-h-1/2">
-            <div class="flex flex-row gap-4">
+            <div class="flex flex-col md:flex-row lg:flex-row gap-4">
             {(typeof alloc.originLocation == "object" && typeof alloc.destLocation == "object") &&
-                <Card className="flex-none w-1/2">
+                <Card className="flex-none md:max-w-1/2">
                     <CardHeader>
                         <CardTitle>Route</CardTitle>
                     </CardHeader>
@@ -114,7 +114,7 @@ const alloc = allocation[0]
                 </Card>
             }
             {(typeof alloc.allocationOriginLocation == "object" && typeof alloc.allocationDestLocation == "object") &&
-                <Card className="flex-none w-1/2">
+                <Card className="flex-none md:max-w-1/2">
                     <CardHeader>
                         <CardTitle>Allocation Route</CardTitle>
                     </CardHeader>
