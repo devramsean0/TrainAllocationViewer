@@ -9,6 +9,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 import Icon from "@hackclub/icons";
 
@@ -61,7 +69,8 @@ const alloc = allocation[0]
                 </CardContent>
             </Card>
         </section>
-        <section class="col-span-2 flex flex-row gap-4 max-h-1/2">
+        <section class="col-span-2 flex flex-col gap-4 max-h-1/2">
+            <div class="flex flex-row gap-4">
             {(typeof alloc.originLocation == "object" && typeof alloc.destLocation == "object") &&
                 <Card className="flex-none w-1/2">
                     <CardHeader>
@@ -143,6 +152,52 @@ const alloc = allocation[0]
                             This service doesn't have a destination set :(
                             </div>
                         }
+                    </CardContent>
+                </Card>
+            }
+            </div>
+            {alloc.vehicles.length != 0 &&
+                <Card className="flex-none">
+                    <CardHeader>
+                        <CardTitle>Vehicle</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-row gap-2 items-center justify-center">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-[100px]">Vehicle ID</TableHead>
+                                    <TableHead>Livery</TableHead>
+                                    <TableHead>Decor</TableHead>
+                                    <TableHead>Vehicle Type</TableHead>
+                                    <TableHead>Weight</TableHead>
+                                    <TableHead>Seat Count</TableHead>
+                                    <TableHead>Characteristics</TableHead>
+                                    <TableHead>Specific Type</TableHead>
+                                    <TableHead>Length</TableHead>
+                                    <TableHead>Cab Count</TableHead>
+                                    <TableHead>Date Entered</TableHead>
+                                    <TableHead>Date Registered</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {alloc.vehicles.map((vehicle) => (
+                                    <TableRow key={vehicle.id}>
+                                        <TableCell className="font-medium">{vehicle.id}</TableCell>
+                                        <TableCell>{(typeof vehicle.livery == "string" && vehicle.livery != " ") && vehicle.livery }</TableCell>
+                                        <TableCell>{(typeof vehicle.decor == "string" && vehicle.decor != " ") && vehicle.decor }</TableCell>
+                                        <TableCell>{(typeof vehicle.vehicleType == "string" && vehicle.vehicleType != " ") && vehicle.vehicleType }</TableCell>
+                                        <TableCell>{(typeof vehicle.weight == "number") && vehicle.weight }</TableCell>
+                                        <TableCell>{(typeof vehicle.seatCount == "number") && vehicle.seatCount }</TableCell>
+                                        <TableCell>{(typeof vehicle.specialCharacteristics == "string" && vehicle.specialCharacteristics != " ") && vehicle.specialCharacteristics }</TableCell>
+                                        <TableCell>{(typeof vehicle.specificType == "string" && vehicle.specificType != " ") && vehicle.specificType }</TableCell>
+                                        <TableCell>{(typeof vehicle.lengthValue == "string" && vehicle.lengthValue != " ") && `${vehicle.lengthValue} ${vehicle.lengthMeasure}`}</TableCell>
+                                        <TableCell>{(typeof vehicle.cabCount == "number") && vehicle.cabCount }</TableCell>
+                                        <TableCell>{(typeof vehicle.dateEnteredService == "string" && vehicle.dateEnteredService != " ") && vehicle.dateEnteredService }</TableCell>
+                                        <TableCell>{(typeof vehicle.dateRegistered == "string" && vehicle.dateRegistered != " ") && vehicle.dateRegistered }</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TabeBody>
+                        </Table>
                     </CardContent>
                 </Card>
             }

@@ -120,11 +120,30 @@ export async function retrieveAllocation(id: number): Promise<Allocation[]> {
                         destinationMiles
                         reversed
                         resourceGroup {
-                            id
-                            fleet
-                            resourceType
-                            status
-                            endOfDayMiles
+                          id
+                          fleet
+                          resourceType
+                          status
+                          endOfDayMiles
+                        },
+                        vehicles {
+                          id,
+                          livery,
+                          decor,
+                          vehicleType,
+                          specificType,
+                          resourcePosition,
+                          lengthValue,
+                          lengthMeasure,
+                          weight,
+                          specialCharacteristics,
+                          seatCount,
+                          cabCount,
+                          dateEnteredService,
+                          dateRegistered,
+                          category,
+                          brakeType,
+                          maxSpeed
                         }
                     }
                 }
@@ -195,6 +214,7 @@ export type Allocation = {
   allocationOriginLocation?: Maybe<Location>
   allocationDestLocation?: Maybe<Location>
   resourceGroup?: Maybe<ResourceGroup>
+  vehicles: Array<Vehicle>
 }
 
 export type Location = {
@@ -214,7 +234,7 @@ export type Query = {
   __typename?: "Query"
   hello: Scalars["String"]
   locations?: Maybe<Array<Location>>
-  resouceGroups?: Maybe<Array<ResourceGroup>>
+  resourceGroups?: Maybe<Array<ResourceGroup>>
   vehicles?: Maybe<Array<Vehicle>>
   allocations?: Maybe<Array<Allocation>>
 }
@@ -223,9 +243,10 @@ export type QueryLocationsArgs = {
   nlc?: Maybe<Scalars["String"]>
 }
 
-export type QueryResouceGroupsArgs = {
+export type QueryResourceGroupsArgs = {
   id?: Maybe<Scalars["String"]>
   specificType?: Maybe<Scalars["String"]>
+  uniqueFleet?: Maybe<Scalars["Boolean"]>
 }
 
 export type QueryVehiclesArgs = {
@@ -269,7 +290,6 @@ export type Vehicle = {
   lengthValue?: Maybe<Scalars["String"]>
   lengthMeasure?: Maybe<Scalars["String"]>
   weight?: Maybe<Scalars["Int"]>
-  specialCharacteristics?: Maybe<Scalars["String"]>
   seatCount?: Maybe<Scalars["Int"]>
   cabCount?: Maybe<Scalars["Int"]>
   dateEnteredService?: Maybe<Scalars["String"]>
@@ -278,4 +298,5 @@ export type Vehicle = {
   brakeType?: Maybe<Scalars["String"]>
   maxSpeed?: Maybe<Scalars["String"]>
   resourceGroup?: Maybe<ResourceGroup>
+  specialCharacteristics?: Maybe<Scalars["String"]>
 }

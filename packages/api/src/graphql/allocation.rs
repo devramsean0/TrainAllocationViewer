@@ -2,7 +2,7 @@ use async_graphql::{ComplexObject, Context};
 use sqlx::PgPool;
 
 pub use crate::db::schema::Allocation;
-use crate::db::schema::{Location, ResourceGroup};
+use crate::db::schema::{Location, ResourceGroup, Vehicle};
 
 #[ComplexObject]
 impl Allocation {
@@ -61,6 +61,16 @@ impl Allocation {
         sqlx::query_as::<_, ResourceGroup>("SELECT * FROM resource_groups WHERE id = $1")
             .bind(&self.resource_group_id)
             .fetch_optional(db)
+            .await
+            .map_err(|e| e.to_string())
+    }
+
+    #[graphql(name = "vehicles")]
+    async fn vehicles(&self, ctx: &Context<'_>) -> Result<Vec<Vehicle>, String> {
+        let db = ctx.data::<PgPool>().map_err(|e| e.message.to_string())?;
+        sqlx::query_as::<_, Vehicle>("SELECT * FROM vehicles WHERE resource_group_id = $1")
+            .bind(&self.resource_group_id)
+            .fetch_all(db)
             .await
             .map_err(|e| e.to_string())
     }
