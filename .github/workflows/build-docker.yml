@@ -22,6 +22,6 @@ jobs:
                   username: devramsean0
                   password: ${{ secrets.GITHUB_TOKEN }}
             - name: Build Docker image
-              run: docker build -t ghcr.io/devramsean0/trainallocationviewer:web-latest
+              run: docker build -t ghcr.io/devramsean0/trainallocationviewer:web-latest ./apps/web
             - name: Push Docker image
               run: docker push ghcr.io/devramsean0/trainallocationviewer:web-latest
