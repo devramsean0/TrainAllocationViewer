@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = [ "services/api" , "services/kafkaproxy", "packages/sdk"]
+members = [ "services/api" , "services/kafkaproxy"]
 
 [workspace.package]
 version = "0.1.0"
