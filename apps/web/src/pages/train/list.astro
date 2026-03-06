@@ -58,8 +58,8 @@ let allocations = await retrieveAllocationList(fleet, date, origin_location, des
                                 {allocations.map((allocation) => (
                                     <TableRow key={allocation.id}>
                                         <TableCell className="font-medium">{allocation.resourceGroup?.id}</TableCell>
-                                        <TableCell>{ allocation.originLocation?.crs != " " ? `${allocation.originLocation?.crs} (crs)` : (allocation.originLocation.uic != " " ? `${allocation.originLocation.uic} (uic)` : `${allocation.originLocation.nlc} (nlc)`) }</TableCell>
-                                        <TableCell>{ allocation.destLocation?.crs != " " ? `${allocation.destLocation?.crs} (crs)` : (allocation.destLocation.uic != " " ? `${allocation.destLocation.uic} (uic)` : `${allocation.destLocation.nlc} (nlc)`) }</TableCell>
+                                        <TableCell>{ allocation.originLocation?.display} ({ allocation.originLocation?.displayType})</TableCell>
+                                        <TableCell>{ allocation.destLocation?.display} ({ allocation.destLocation?.displayType})</TableCell>
                                         <TableCell>
                                             <a href={`/train/${allocation.id}`}>
                                                 <Button>More details</Button>

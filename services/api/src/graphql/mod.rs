@@ -10,6 +10,7 @@ use axum::{
 use log::info;
 use sqlx::PgPool;
 use tokio::{spawn, sync::broadcast::Sender};
+use tower_http::cors::{Any, CorsLayer};
 
 pub mod allocation;
 pub mod vehicles;
@@ -28,21 +29,32 @@ impl Query {
         &self,
         ctx: &Context<'_>,
         #[graphql(desc = "Filter by NLC")] nlc: Option<String>,
+        #[graphql(desc = "Filter by has UIC")] has_uic: Option<bool>,
     ) -> Result<Option<Vec<Location>>, String> {
         let db = match ctx.data::<PgPool>() {
             Ok(db) => db,
             Err(err) => return Err(err.message.to_string()),
         };
 
-        let res = match sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE (CASE WHEN $1 IS NOT NULL THEN (nlc = $1) ELSE (id = id) END);").bind(nlc)
-            .fetch_all(db)
-            .await
-        {
-            Ok(res) => res,
-            Err(err) => return Err(err.to_string()),
-        };
-
-        Ok(Some(res))
+        if has_uic == Some(true) {
+            let res = match sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE (CASE WHEN $1 IS NOT NULL THEN (nlc = $1) ELSE (id = id) END) AND uic != ' ';").bind(nlc)
+                .fetch_all(db)
+                .await
+            {
+                Ok(res) => res,
+                Err(err) => return Err(err.to_string()),
+            };
+            Ok(Some(res))
+        } else {
+            let res = match sqlx::query_as::<_, Location>("SELECT * FROM locations WHERE (CASE WHEN $1 IS NOT NULL THEN (nlc = $1) ELSE (id = id) END);").bind(nlc)
+                .fetch_all(db)
+                .await
+            {
+                Ok(res) => res,
+                Err(err) => return Err(err.to_string()),
+            };
+            Ok(Some(res))
+        }
     }
 
     async fn resource_groups(
@@ -207,10 +219,17 @@ pub async fn serve(pool: &PgPool, sender: &Sender<()>) -> anyhow::Result<()> {
             .data(pool)
             .finish();
 
-        let router = Router::new().route(
-            "/",
-            get(graphiql).post_service(GraphQL::new(schema.clone())),
-        );
+        let cors = CorsLayer::new()
+            .allow_origin(Any)
+            .allow_methods(Any)
+            .allow_headers(Any);
+
+        let router = Router::new()
+            .route(
+                "/",
+                get(graphiql).post_service(GraphQL::new(schema.clone())),
+            )
+            .layer(cors);
 
         let listener = tokio::net::TcpListener::bind(format!("{host}:{port}"))
             .await

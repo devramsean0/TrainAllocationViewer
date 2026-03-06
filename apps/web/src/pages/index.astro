@@ -21,6 +21,7 @@ import {
   FieldSet,
   FieldTitle,
 } from "@/components/ui/field";
+import LocationSearch from '@/components/LocationSearch';
 ---
 <Layout title="Search">
 	<div class="flex flex-col justify-center items-center min-h-screen">
@@ -46,12 +47,12 @@ import {
 						</Field>
 						<FieldGroup className="grid grid-cols-2 gap-2">
 							<Field>
-								<FieldLabel htmlFor="start_location">Start Location</FieldLabel>
-								<Input name="origin_location" type="text" />
+								<FieldLabel htmlFor="origin_location">Start Location</FieldLabel>
+								<LocationSearch name="origin_location" placeholder="Start location" client:load/>
 							</Field>
 							<Field>
-								<FieldLabel htmlFor="end_location">End Location</FieldLabel>
-								<Input name="dest_location" type="text" />
+								<FieldLabel htmlFor="dest_location">End Location</FieldLabel>
+								<LocationSearch name="dest_location" placeholder="End Location" client:load/>
 							</Field>
 						</FieldGroup>
 						<Button type="submit">Search</Button>

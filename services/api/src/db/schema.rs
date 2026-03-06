@@ -86,6 +86,8 @@ pub struct Location {
     pub nlcdesc: Option<String>,
     pub axis: Option<String>,
     pub nlcdesc16: Option<String>,
+    pub display: String,
+    pub display_type: String,
 }
 
 #[derive(Debug, Clone, FromRow)]

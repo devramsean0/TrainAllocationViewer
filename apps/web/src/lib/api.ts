@@ -13,17 +13,15 @@ export async function retrieveAllocationList(fleet: string, date: string, origin
                     allocations(fleet: $fleet, date: $date, originLocation: $originLocation, destLocation: $destLocation) {
                         id,
                         originLocation {
-                            crs,
-                            nlc,
-                            uic
+                          display,
+                          displayType
                         }
                         resourceGroup {
                             id,
                         },
                         destLocation {
-                            crs,
-                            nlc,
-                            uic
+                          display,
+                          displayType
                         },
                     }
                 }
@@ -159,12 +157,44 @@ export async function retrieveAllocation(id: number): Promise<Allocation[]> {
     return (await res.json() as AllocationListResRaw).data.allocations;
 }
 
+export async function retrieveLocations(): Promise<Location[]> {
+  let body = {
+    query: `
+      query getLocationList {
+        locations(hasUic: true) {
+          display,
+          displayType,
+          uic,
+        }
+      }
+    `,
+    variables: {
+    }
+  };
+  //console.log(fleet, body)
+  let res = await localFetch("http://127.0.0.1:3001/", {
+      method: "POST",
+      body: JSON.stringify(body)
+  })
+  //console.log(res)
+  //console.log(await res.text())
+  return (await res.json() as LocationListResRaw).data.locations;
+  //return []
+}
+
 
 interface AllocationListResRaw {
+  data: {
+    allocations: Allocation[]
+  }
+}
+
+interface LocationListResRaw {
     data: {
-        allocations: Allocation[]
+      locations: Location[]
     }
 }
+
 
 export type Maybe<T> = T | null
 export type Exact<T extends { [key: string]: unknown }> = {
@@ -228,6 +258,8 @@ export type Location = {
   nlcdesc?: Maybe<Scalars["String"]>
   axis?: Maybe<Scalars["String"]>
   nlcdesc16?: Maybe<Scalars["String"]>
+  display?: Maybe<Scalars["String"]>
+  displayType?: Maybe<Scalars["String"]>
 }
 
 export type Query = {
@@ -240,7 +272,8 @@ export type Query = {
 }
 
 export type QueryLocationsArgs = {
-  nlc?: Maybe<Scalars["String"]>
+  nlc?: Maybe<Scalars["String"]>,
+  hasUic?: Maybe<Scalars["Boolean"]>,
 }
 
 export type QueryResourceGroupsArgs = {
