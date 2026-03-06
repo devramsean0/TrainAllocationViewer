@@ -8,6 +8,8 @@ flowchart LR
     CORPUSData[Corpus Location Data] -->|S3| API
     BPLANData[BPLAN Data] -->|S3| API
 
+	NWRSchedule[Schedule] -->|NTROD| API
+
     API -->|GraphQL|AndroidApp[Android App]
     API -->|GraphQL|Web[Website]
     

@@ -29,6 +29,7 @@ async fn main() -> anyhow::Result<()> {
     info!("Database migrations completed successfully");
     providers::corpus::update_corpus(pool).await?;
     providers::bplan::update_bplan(pool).await?;
+    providers::schedule::update_schedule(pool).await?;
 
     init_scheduler().await?;
 

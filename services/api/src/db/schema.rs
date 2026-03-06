@@ -118,3 +118,44 @@ pub struct ReferenceCode {
     pub code: Option<String>,
     pub description: String,
 }
+
+#[derive(Debug, Clone, FromRow)]
+pub struct CifScheduleLog {
+    pub id: Option<i64>,
+    pub mainframe_identity: String,
+    pub extract_date: String,
+    pub extract_time: String,
+    pub file_reference: String,
+    pub version: String,
+}
+
+#[derive(Debug, Clone, FromRow)]
+pub struct Schedule {
+    pub id: Option<i64>,
+    pub uid: String,
+    pub identity: String,
+    pub headcode: i64,
+    pub date: String,
+    pub allocation_id: Option<i64>,
+    pub indicator: String,
+    pub atoc_code: String,
+    pub performance_monitoring: bool,
+}
+
+#[derive(Debug, Clone, FromRow)]
+pub struct ScheduleLocation {
+    id: Option<i64>,
+    location: String,
+    scheduled_departure_time: Option<String>,
+    scheduled_arrival_time: Option<String>,
+    scheduled_pass_time: Option<String>,
+    public_departure_time: Option<String>,
+    public_arrival_time: Option<String>,
+    platform: Option<String>,
+    line: Option<String>,
+    engineering_allowance: Option<String>,
+    pathing_allowance: Option<String>,
+    performance_allowance: Option<String>,
+    activity: Option<String>,
+    schedule_id: i64,
+}
