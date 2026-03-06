@@ -55,6 +55,7 @@ pub struct Vehicle {
     pub length_value: Option<String>,
     pub length_measure: Option<String>,
     pub weight: Option<i32>,
+    #[graphql(skip)]
     pub special_characteristics: Option<String>,
     pub seat_count: Option<i32>,
     pub cab_count: Option<i32>,
