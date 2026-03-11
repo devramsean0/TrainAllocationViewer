@@ -48,6 +48,6 @@ impl NRStatic {
             .replace("\"\\", "")
             .replace("\"", "");
         debug!("etag: {}", etag);
-        Ok(String::new())
+        Ok(etag)
     }
 }

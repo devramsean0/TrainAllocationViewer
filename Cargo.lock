@@ -895,6 +895,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
+name = "fixed_width"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dbad2f55fb44d8d76d33fb8726bb7d185a4b87401361836c449b4d6f5c8065f0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "fixed_width_derive"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "963c6ab68071dd1efd646643d22164bf1f3c3003564057db5d8c0f9fd086b28e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "flate2"
 version = "1.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3303,6 +3323,8 @@ dependencies = [
  "csv",
  "dotenv",
  "env_logger",
+ "fixed_width",
+ "fixed_width_derive",
  "flate2",
  "futures",
  "log",

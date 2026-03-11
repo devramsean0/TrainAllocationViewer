@@ -5,5 +5,7 @@ pub mod cif_schedule_log;
 pub mod location;
 pub mod reference_codes;
 pub mod resource_group;
+pub mod schedule;
+pub mod schedule_location;
 pub mod schema;
 pub mod vehicle;

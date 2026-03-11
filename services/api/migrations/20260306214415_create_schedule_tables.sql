@@ -6,9 +6,9 @@ CREATE table cif_schedule_log(
     extract_time TEXT NOT NULL,
     file_reference TEXT NOT NULL,
     version CHAR NOT NULL
-)
+);
 
-CREATE TABLE schedule(
+CREATE TABLE schedules(
     id BIGSERIAL PRIMARY KEY,
     uid TEXT NOT NULL,
     identity TEXT NOT NULL,
@@ -18,9 +18,9 @@ CREATE TABLE schedule(
     indicator TEXT NOT NULL,
     atoc_code TEXT NOT NULL,
     performance_monitoring BOOLEAN NOT NULL
-)
+);
 
-CREATE TABLE schedule_location(
+CREATE TABLE schedule_locations(
     id BIGSERIAL PRIMARY KEY,
     location TEXT NOT NULL,
     scheduled_departure_time TEXT,
@@ -35,4 +35,7 @@ CREATE TABLE schedule_location(
     performance_allowance TEXT,
     activity TEXT,
     schedule_id BIGSERIAL NOT NULL
-)
+);
+
+CREATE UNIQUE INDEX schedules_unique_idx ON schedules (uid, identity, headcode, date, atoc_code);
+CREATE UNIQUE INDEX schedules_locations_unique_idx ON schedule_locations (schedule_id, location);
