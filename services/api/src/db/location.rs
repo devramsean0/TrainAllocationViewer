@@ -131,4 +131,17 @@ impl Location {
         }
         Ok(())
     }
+
+    pub async fn get_locations_where_has_tiploc(
+        pool: &sqlx::postgres::PgPool,
+    ) -> Result<Vec<Location>, sqlx::Error> {
+        let rows = sqlx::query_as::<_, Location>(
+            "SELECT * locations
+            WHERE
+                tiploc != ' ';",
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(rows)
+    }
 }

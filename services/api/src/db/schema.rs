@@ -135,11 +135,13 @@ pub struct Schedule {
     pub uid: String,
     pub identity: String,
     pub headcode: i64,
-    pub date: String,
-    pub allocation_id: Option<i64>,
     pub indicator: String,
     pub atoc_code: String,
     pub performance_monitoring: bool,
+    pub origin_location: String,
+    pub dest_location: String,
+    pub start_date: String,
+    pub end_date: String,
 }
 
 #[derive(Debug, Clone, FromRow)]

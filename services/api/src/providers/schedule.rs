@@ -6,9 +6,13 @@ use rdkafka::message::ToBytes;
 use serde::Deserialize;
 use sqlx::{Pool, Postgres};
 
-use std::io::Read;
+use std::{collections::HashMap, io::Read};
 
-use crate::{db::schema::CifScheduleLog, sources::nr_static::NRStatic, utils};
+use crate::{
+    db::schema::{CifScheduleLog, Location},
+    sources::nr_static::NRStatic,
+    utils,
+};
 use std::fs;
 
 async fn decide_on_download() -> anyhow::Result<bool> {
@@ -47,6 +51,11 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
     let mut schedule_string = String::new();
     decompressor.read_to_string(&mut schedule_string).unwrap();
 
+    let mut reference_locations: HashMap<String, String> = HashMap::new();
+    for loc in Location::get_locations_where_has_tiploc(pool).await? {
+        reference_locations.insert(loc.tiploc.unwrap(), loc.uic.unwrap());
+    }
+
     let mut locations: Vec<LocationTypes> = vec![];
     let mut schedule: Option<StructuredSchedule> = None;
 
@@ -54,7 +63,6 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
         match &line[0..2] {
             "HD" => {
                 let data = from_bytes::<CIFHeader>(line.as_bytes()).ok();
-                println!("{:#?}", data);
                 if data.is_some() {
                     let data = data.unwrap();
                     CifScheduleLog::insert(
@@ -82,6 +90,8 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
                         indicator: data.stp_indicator,
                         atoc_code: None,
                         performance_monitoring: None,
+                        origin_location: None,
+                        dest_location: None,
                     })
                 }
                 None => {
@@ -102,7 +112,22 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
                 }
             },
             "LO" => match from_bytes::<CIFOriginLocation>(line.as_bytes()).ok() {
-                Some(data) => {
+                Some(mut data) => {
+                    let mut location = data.location;
+                    location.truncate(location.len() - 1); // Hopefully extract the tiploc -  the suffix
+
+                    let mut schedule_temp = schedule.expect("schedule should exist");
+
+                    schedule_temp.origin_location = Some(
+                        reference_locations
+                            .get(&location)
+                            .expect("tiploc should exist")
+                            .clone(),
+                    );
+
+                    data.location = schedule_temp.origin_location.clone().unwrap();
+                    schedule = Some(schedule_temp);
+
                     locations.push(LocationTypes::Origin(data));
                 }
                 None => {
@@ -178,41 +203,41 @@ struct CIFBasicSchedule {
     date_to: Option<String>,
     #[fixed_width(range = "21..28")]
     days_run: Option<String>,
-    #[fixed_width(range = "29..30")]
+    #[fixed_width(range = "28..29")]
     bank_holiday_running: Option<String>,
-    #[fixed_width(range = "30..31")]
+    #[fixed_width(range = "29..30")]
     train_status: Option<String>,
-    #[fixed_width(range = "31..33")]
+    #[fixed_width(range = "30..32")]
     train_category: Option<String>,
-    #[fixed_width(range = "33..37")]
+    #[fixed_width(range = "32..36")]
     train_identity: Option<String>,
-    #[fixed_width(range = "37..41")]
-    train_headcode: Option<i64>,
-    #[fixed_width(range = "41..42")]
+    #[fixed_width(range = "36..40")]
+    train_headcode: Option<String>,
+    #[fixed_width(range = "40..41")]
     course_indicator: String,
-    #[fixed_width(range = "42..50")]
-    train_service_code: Option<i64>,
-    #[fixed_width(range = "50..51")]
+    #[fixed_width(range = "41..49")]
+    train_service_code: Option<String>,
+    #[fixed_width(range = "49..50")]
     portion: Option<String>,
-    #[fixed_width(range = "51..54")]
+    #[fixed_width(range = "50..53")]
     power_type: Option<String>,
-    #[fixed_width(range = "54..58")]
-    timing_load: Option<String>,
-    #[fixed_width(range = "58..61")]
+    #[fixed_width(range = "53..57")]
+    timing_load: String,
+    #[fixed_width(range = "57..60")]
     speed: Option<String>,
-    #[fixed_width(range = "61..67")]
+    #[fixed_width(range = "60..66")]
     operating_characteristic: Option<String>,
-    #[fixed_width(range = "67..68")]
+    #[fixed_width(range = "66..67")]
     seating_class: Option<String>,
-    #[fixed_width(range = "68..69")]
+    #[fixed_width(range = "67..68")]
     sleepers: Option<String>,
-    #[fixed_width(range = "69..70")]
+    #[fixed_width(range = "68..69")]
     reservations: Option<String>,
-    #[fixed_width(range = "70..71")]
+    #[fixed_width(range = "69..70")]
     connection_indicator: Option<String>,
-    #[fixed_width(range = "71..74")]
+    #[fixed_width(range = "70..73")]
     catering_code: Option<String>,
-    #[fixed_width(range = "74..78")]
+    #[fixed_width(range = "73..77")]
     service_branding: Option<String>,
     #[fixed_width(range = "79..80")]
     stp_indicator: String,
@@ -234,12 +259,14 @@ struct CIFBasicScheduleExtended {
 struct StructuredSchedule {
     uid: String,
     identity: Option<String>,
-    headcode: Option<i64>,
+    headcode: Option<String>,
     start_date: String,
     end_date: Option<String>,
     indicator: String,
     atoc_code: Option<String>,
     performance_monitoring: Option<bool>,
+    origin_location: Option<String>,
+    dest_location: Option<String>,
 }
 
 enum LocationTypes {
