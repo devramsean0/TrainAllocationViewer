@@ -6,9 +6,9 @@ impl Schedule {
     pub async fn insert(
         pool: &sqlx::postgres::PgPool,
         schdle: Schedule,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<Schedule, sqlx::Error> {
         let row = sqlx::query_as::<_, Schedule>(
-            "INSERT INTO schedule (
+            "INSERT INTO schedules (
                 uid,
                 identity,
                 headcode,
@@ -57,6 +57,6 @@ impl Schedule {
         .fetch_one(pool)
         .await?;
         debug!("Inserted Schedule with ID: {:?}", row.id);
-        Ok(())
+        Ok(row)
     }
 }

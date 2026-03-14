@@ -134,7 +134,7 @@ pub struct Schedule {
     pub id: Option<i64>,
     pub uid: String,
     pub identity: String,
-    pub headcode: i64,
+    pub headcode: Option<String>,
     pub indicator: String,
     pub atoc_code: String,
     pub performance_monitoring: bool,

@@ -136,7 +136,7 @@ impl Location {
         pool: &sqlx::postgres::PgPool,
     ) -> Result<Vec<Location>, sqlx::Error> {
         let rows = sqlx::query_as::<_, Location>(
-            "SELECT * locations
+            "SELECT * FROM locations
             WHERE
                 tiploc != ' ';",
         )

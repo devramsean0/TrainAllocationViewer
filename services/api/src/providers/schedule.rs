@@ -9,7 +9,7 @@ use sqlx::{Pool, Postgres};
 use std::{collections::HashMap, io::Read};
 
 use crate::{
-    db::schema::{CifScheduleLog, Location},
+    db::schema::{CifScheduleLog, Location, Schedule, ScheduleLocation},
     sources::nr_static::NRStatic,
     utils,
 };
@@ -56,6 +56,8 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
         reference_locations.insert(loc.tiploc.unwrap(), loc.uic.unwrap());
     }
 
+    info!("Prep Work Done, Processing now");
+
     let mut locations: Vec<LocationTypes> = vec![];
     let mut schedule: Option<StructuredSchedule> = None;
 
@@ -100,12 +102,10 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
             },
             "BX" => match from_bytes::<CIFBasicScheduleExtended>(line.as_bytes()).ok() {
                 Some(data) => {
-                    let mut schedule_temp = schedule.expect("schedule should exist");
+                    let schedule_temp = schedule.as_mut().expect("schedule should exist");
 
                     schedule_temp.atoc_code = Some(data.atoc_code);
                     schedule_temp.performance_monitoring = Some(data.performance_monitoring == "Y");
-
-                    schedule = Some(schedule_temp);
                 }
                 None => {
                     error!("Error parsing BX record (raw: {line})")
@@ -113,10 +113,16 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
             },
             "LO" => match from_bytes::<CIFOriginLocation>(line.as_bytes()).ok() {
                 Some(mut data) => {
-                    let mut location = data.location;
-                    location.truncate(location.len() - 1); // Hopefully extract the tiploc -  the suffix
+                    let location = data
+                        .location
+                        .trim()
+                        .chars()
+                        .take(7)
+                        .collect::<String>()
+                        .trim()
+                        .to_string();
 
-                    let mut schedule_temp = schedule.expect("schedule should exist");
+                    let schedule_temp = schedule.as_mut().expect("schedule should exist");
 
                     schedule_temp.origin_location = Some(
                         reference_locations
@@ -126,8 +132,6 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
                     );
 
                     data.location = schedule_temp.origin_location.clone().unwrap();
-                    schedule = Some(schedule_temp);
-
                     locations.push(LocationTypes::Origin(data));
                 }
                 None => {
@@ -144,20 +148,125 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
             },
             "LT" => {
                 match from_bytes::<CIFTerminatingLocation>(line.as_bytes()).ok() {
-                    Some(data) => {
-                        locations.push(LocationTypes::Terminating(data));
+                    Some(mut data) => {
+                        let location = data
+                            .location
+                            .trim()
+                            .chars()
+                            .take(7)
+                            .collect::<String>()
+                            .trim()
+                            .to_string(); // Strip away the suffix from the location
 
-                        //STEPS TO INGEST Schedule
-                        /*
-                        1. Decide on dates
-                        2. in loop
-                            3. create schedule
-                            4. create schedule_location for schedule
-                        3. try to match it to current allocation
-                         */
+                        let schedule_temp = schedule.as_mut().expect("schedule should exist");
+
+                        schedule_temp.dest_location = Some(
+                            reference_locations
+                                .get(&location)
+                                .expect(format!("tiploc {location} should exist").as_str())
+                                .clone(),
+                        );
+
+                        data.location = schedule_temp.dest_location.clone().unwrap();
+                        locations.push(LocationTypes::Terminating(data));
                     }
                     None => {
                         error!("Error parsing LT record (raw: {line})")
+                    }
+                }
+                let schedule_temp = schedule.as_ref().expect("schedule should exist");
+                let db_schedule = Schedule::insert(
+                    pool,
+                    Schedule {
+                        id: None,
+                        uid: schedule_temp.uid.clone(),
+                        identity: schedule_temp.identity.clone().unwrap(),
+                        headcode: schedule_temp.headcode.clone(),
+                        indicator: schedule_temp.indicator.clone(),
+                        atoc_code: schedule_temp.atoc_code.clone().unwrap(),
+                        performance_monitoring: schedule_temp.performance_monitoring.unwrap(),
+                        origin_location: schedule_temp.origin_location.clone().unwrap(),
+                        dest_location: schedule_temp
+                            .dest_location
+                            .clone()
+                            .expect("Dest Location should exist"),
+                        start_date: schedule_temp.start_date.clone(),
+                        end_date: schedule_temp
+                            .end_date
+                            .clone()
+                            .expect("End Date should exist"),
+                    },
+                )
+                .await?;
+
+                for loc in locations.clone() {
+                    match loc {
+                        LocationTypes::Origin(data) => {
+                            ScheduleLocation::insert(
+                                pool,
+                                ScheduleLocation {
+                                    id: None,
+                                    location: data.location,
+                                    scheduled_departure_time: Some(data.scheduled_departure_time),
+                                    scheduled_arrival_time: None,
+                                    scheduled_pass_time: None,
+                                    public_departure_time: Some(data.public_departure_time),
+                                    public_arrival_time: None,
+                                    platform: data.platform,
+                                    line: data.line,
+                                    engineering_allowance: data.engineering_allowance,
+                                    pathing_allowance: data.pathing_allowance,
+                                    performance_allowance: data.performance_allowance,
+                                    activity: Some(data.activity),
+                                    schedule_id: db_schedule.id.unwrap(),
+                                },
+                            )
+                            .await?;
+                        }
+                        LocationTypes::Intermediate(data) => {
+                            ScheduleLocation::insert(
+                                pool,
+                                ScheduleLocation {
+                                    id: None,
+                                    location: data.location,
+                                    scheduled_departure_time: data.scheduled_departure_time,
+                                    scheduled_arrival_time: data.scheduled_arrival_time,
+                                    scheduled_pass_time: data.scheduled_pass_time,
+                                    public_departure_time: Some(data.public_departure_time),
+                                    public_arrival_time: Some(data.public_arrival_time),
+                                    platform: data.platform,
+                                    line: data.line,
+                                    engineering_allowance: data.engineering_allowance,
+                                    pathing_allowance: data.pathing_allowance,
+                                    performance_allowance: data.performance_allowance,
+                                    activity: data.activity,
+                                    schedule_id: db_schedule.id.unwrap(),
+                                },
+                            )
+                            .await?;
+                        }
+                        LocationTypes::Terminating(data) => {
+                            ScheduleLocation::insert(
+                                pool,
+                                ScheduleLocation {
+                                    id: None,
+                                    location: data.location,
+                                    scheduled_departure_time: None,
+                                    scheduled_arrival_time: Some(data.scheduled_arrival_time),
+                                    scheduled_pass_time: None,
+                                    public_departure_time: None,
+                                    public_arrival_time: Some(data.public_arrival_time),
+                                    platform: data.platform,
+                                    line: None,
+                                    engineering_allowance: None,
+                                    pathing_allowance: None,
+                                    performance_allowance: None,
+                                    activity: Some(data.activity),
+                                    schedule_id: db_schedule.id.unwrap(),
+                                },
+                            )
+                            .await?;
+                        }
                     }
                 }
             }
@@ -269,13 +378,14 @@ struct StructuredSchedule {
     dest_location: Option<String>,
 }
 
+#[derive(Clone)]
 enum LocationTypes {
     Origin(CIFOriginLocation),
     Intermediate(CIFIntermediateLocation),
     Terminating(CIFTerminatingLocation),
 }
 
-#[derive(Debug, Deserialize, FixedWidth)]
+#[derive(Debug, Deserialize, FixedWidth, Clone)]
 struct CIFOriginLocation {
     #[fixed_width(range = "2..10")]
     location: String,
@@ -297,7 +407,7 @@ struct CIFOriginLocation {
     performance_allowance: Option<String>,
 }
 
-#[derive(Debug, Deserialize, FixedWidth)]
+#[derive(Debug, Deserialize, FixedWidth, Clone)]
 struct CIFIntermediateLocation {
     #[fixed_width(range = "2..10")]
     location: String,
@@ -327,7 +437,7 @@ struct CIFIntermediateLocation {
     performance_allowance: Option<String>,
 }
 
-#[derive(Debug, Deserialize, FixedWidth)]
+#[derive(Debug, Deserialize, FixedWidth, Clone)]
 struct CIFTerminatingLocation {
     #[fixed_width(range = "2..10")]
     location: String,
