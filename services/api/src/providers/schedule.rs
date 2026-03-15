@@ -105,6 +105,7 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
                 let schdle = meta_schdle.schdle.as_mut().unwrap();
                 schdle.origin_location = Some(data.clone().location);
 
+                meta_schdle.locs = vec![];
                 meta_schdle.locs.push(LocationTypes::Origin(data));
             }
             CIFRowTypes::IntermediateLocation(data) => {
