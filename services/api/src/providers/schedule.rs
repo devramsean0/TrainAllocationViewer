@@ -56,13 +56,17 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
         reference_locations.insert(loc.tiploc.unwrap(), loc.uic.unwrap());
     }
 
-    info!("Prep Work Done, Processing now");
+    info!("Prep Work Done, Parsing");
 
-    let mut locations: Vec<LocationTypes> = vec![];
-    let mut schedule: Option<StructuredSchedule> = None;
+    let mut schdles: Vec<MetaSchedule> = vec![];
+    let mut meta_schdle = MetaSchedule {
+        schdle: None,
+        locs: vec![],
+    };
 
-    for line in schedule_string.split("\n") {
-        match &line[0..2] {
+    let lines = schedule_string.split("\n");
+    for line in lines {
+        /* match &line[0..2] {
             "HD" => {
                 let data = from_bytes::<CIFHeader>(line.as_bytes()).ok();
                 if data.is_some() {
@@ -102,10 +106,10 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
             },
             "BX" => match from_bytes::<CIFBasicScheduleExtended>(line.as_bytes()).ok() {
                 Some(data) => {
-                    let schedule_temp = schedule.as_mut().expect("schedule should exist");
+                    let schdle_temp = schedule.as_mut().expect("schedule should exist");
 
-                    schedule_temp.atoc_code = Some(data.atoc_code);
-                    schedule_temp.performance_monitoring = Some(data.performance_monitoring == "Y");
+                    schdle_temp.atoc_code = Some(data.atoc_code);
+                    schdle_temp.performance_monitoring = Some(data.performance_monitoring == "Y");
                 }
                 None => {
                     error!("Error parsing BX record (raw: {line})")
@@ -122,16 +126,16 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
                         .trim()
                         .to_string();
 
-                    let schedule_temp = schedule.as_mut().expect("schedule should exist");
+                    let schdle_temp = schedule.as_mut().expect("schedule should exist");
 
-                    schedule_temp.origin_location = Some(
+                    schdle_temp.origin_location = Some(
                         reference_locations
                             .get(&location)
                             .expect("tiploc should exist")
                             .clone(),
                     );
 
-                    data.location = schedule_temp.origin_location.clone().unwrap();
+                    data.location = schdle_temp.origin_location.clone().unwrap();
                     locations.push(LocationTypes::Origin(data));
                 }
                 None => {
@@ -158,40 +162,40 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
                             .trim()
                             .to_string(); // Strip away the suffix from the location
 
-                        let schedule_temp = schedule.as_mut().expect("schedule should exist");
+                        let schdle_temp = schedule.as_mut().expect("schedule should exist");
 
-                        schedule_temp.dest_location = Some(
+                        schdle_temp.dest_location = Some(
                             reference_locations
                                 .get(&location)
                                 .expect(format!("tiploc {location} should exist").as_str())
                                 .clone(),
                         );
 
-                        data.location = schedule_temp.dest_location.clone().unwrap();
+                        data.location = schdle_temp.dest_location.clone().unwrap();
                         locations.push(LocationTypes::Terminating(data));
                     }
                     None => {
                         error!("Error parsing LT record (raw: {line})")
                     }
                 }
-                let schedule_temp = schedule.as_ref().expect("schedule should exist");
+                let schdle_temp = schedule.as_ref().expect("schedule should exist");
                 let db_schedule = Schedule::insert(
                     pool,
                     Schedule {
                         id: None,
-                        uid: schedule_temp.uid.clone(),
-                        identity: schedule_temp.identity.clone().unwrap(),
-                        headcode: schedule_temp.headcode.clone(),
-                        indicator: schedule_temp.indicator.clone(),
-                        atoc_code: schedule_temp.atoc_code.clone().unwrap(),
-                        performance_monitoring: schedule_temp.performance_monitoring.unwrap(),
-                        origin_location: schedule_temp.origin_location.clone().unwrap(),
-                        dest_location: schedule_temp
+                        uid: schdle_temp.uid.clone(),
+                        identity: schdle_temp.identity.clone().unwrap(),
+                        headcode: schdle_temp.headcode.clone(),
+                        indicator: schdle_temp.indicator.clone(),
+                        atoc_code: schdle_temp.atoc_code.clone().unwrap(),
+                        performance_monitoring: schdle_temp.performance_monitoring.unwrap(),
+                        origin_location: schdle_temp.origin_location.clone().unwrap(),
+                        dest_location: schdle_temp
                             .dest_location
                             .clone()
                             .expect("Dest Location should exist"),
-                        start_date: schedule_temp.start_date.clone(),
-                        end_date: schedule_temp
+                        start_date: schdle_temp.start_date.clone(),
+                        end_date: schdle_temp
                             .end_date
                             .clone()
                             .expect("End Date should exist"),
@@ -236,7 +240,7 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
                                     public_arrival_time: Some(data.public_arrival_time),
                                     platform: data.platform,
                                     line: data.line,
-                                    engineering_allowance: data.engineering_allowance,
+                                    engineering_allowance: data.engineering_allowance,Processing now
                                     pathing_allowance: data.pathing_allowance,
                                     performance_allowance: data.performance_allowance,
                                     activity: data.activity,
@@ -271,11 +275,265 @@ pub async fn update_schedule(pool: &Pool<Postgres>) -> anyhow::Result<()> {
                 }
             }
             _ => {}
+        } */
+        let parsed_line = parse_line(line, &reference_locations);
+        match parsed_line {
+            CIFRowTypes::Header(data) => {
+                CifScheduleLog::insert(
+                    pool,
+                    CifScheduleLog {
+                        id: None,
+                        mainframe_identity: data.mainframe_identity,
+                        extract_date: data.extract_date,
+                        extract_time: data.extract_time,
+                        file_reference: data.current_file_reference,
+                        version: data.version,
+                    },
+                )
+                .await?;
+            }
+            CIFRowTypes::BasicSchedule(data) => {
+                meta_schdle.schdle = Some(StructuredSchedule {
+                    uid: data.train_uid,
+                    identity: data.train_identity,
+                    headcode: data.train_headcode,
+                    start_date: data.date_from,
+                    end_date: data.date_to,
+                    indicator: data.stp_indicator,
+                    atoc_code: None,
+                    performance_monitoring: None,
+                    origin_location: None,
+                    dest_location: None,
+                });
+            }
+            CIFRowTypes::BasicScheduleExtended(data) => {
+                let schdle = meta_schdle.schdle.as_mut().unwrap();
+                schdle.atoc_code = Some(data.atoc_code);
+                schdle.performance_monitoring = Some(data.performance_monitoring == "Y");
+            }
+            CIFRowTypes::OriginLocation(data) => {
+                let schdle = meta_schdle.schdle.as_mut().unwrap();
+                schdle.origin_location = Some(data.clone().location);
+
+                meta_schdle.locs.push(LocationTypes::Origin(data));
+            }
+            CIFRowTypes::IntermediateLocation(data) => {
+                meta_schdle.locs.push(LocationTypes::Intermediate(data));
+            }
+            CIFRowTypes::TerminatingLocation(data) => {
+                let schdle = meta_schdle.schdle.as_mut().unwrap();
+                schdle.dest_location = Some(data.clone().location);
+
+                meta_schdle.locs.push(LocationTypes::Terminating(data));
+
+                schdles.push(meta_schdle.clone());
+            }
+            CIFRowTypes::Unknown => {}
         }
     }
+    info!("Statistics: [total schedules: {}]", schdles.len());
+    info!("Finished Parsing, Inserting into DB");
+    for chunk in schdles.chunks(1000) {
+        debug!("Inserting Chunk");
+        for schdle in chunk {
+            let schdle_temp = schdle.schdle.as_ref().unwrap();
+            let db_schdle = Schedule::insert(
+                pool,
+                Schedule {
+                    id: None,
+                    uid: schdle_temp.uid.clone(),
+                    identity: schdle_temp.identity.clone().unwrap(),
+                    headcode: schdle_temp.headcode.clone(),
+                    indicator: schdle_temp.indicator.clone(),
+                    atoc_code: schdle_temp.atoc_code.clone().unwrap(),
+                    performance_monitoring: schdle_temp.performance_monitoring.unwrap(),
+                    origin_location: schdle_temp.origin_location.clone().unwrap(),
+                    dest_location: schdle_temp
+                        .dest_location
+                        .clone()
+                        .expect("Dest Location should exist"),
+                    start_date: schdle_temp.start_date.clone(),
+                    end_date: schdle_temp.end_date.clone().expect("End Date should exist"),
+                },
+            )
+            .await?;
 
+            let mut locations: Vec<ScheduleLocation> = vec![];
+            for loc in schdle.locs.clone() {
+                match loc {
+                    LocationTypes::Origin(data) => {
+                        locations.push(ScheduleLocation {
+                            id: None,
+                            location: data.location.clone(),
+                            scheduled_departure_time: Some(data.scheduled_departure_time.clone()),
+                            scheduled_arrival_time: None,
+                            scheduled_pass_time: None,
+                            public_departure_time: Some(data.public_departure_time.clone()),
+                            public_arrival_time: None,
+                            platform: data.platform.clone(),
+                            line: data.line.clone(),
+                            engineering_allowance: data.engineering_allowance.clone(),
+                            pathing_allowance: data.pathing_allowance.clone(),
+                            performance_allowance: data.performance_allowance.clone(),
+                            activity: Some(data.activity.clone()),
+                            schedule_id: db_schdle.id.unwrap(),
+                        });
+                    }
+                    LocationTypes::Intermediate(data) => {
+                        locations.push(ScheduleLocation {
+                            id: None,
+                            location: data.location.clone(),
+                            scheduled_departure_time: data.scheduled_departure_time.clone(),
+                            scheduled_arrival_time: data.scheduled_arrival_time.clone(),
+                            scheduled_pass_time: data.scheduled_pass_time.clone(),
+                            public_departure_time: Some(data.public_departure_time.clone()),
+                            public_arrival_time: Some(data.public_arrival_time.clone()),
+                            platform: data.platform.clone(),
+                            line: data.line.clone(),
+                            engineering_allowance: data.engineering_allowance.clone(),
+                            pathing_allowance: data.pathing_allowance.clone(),
+                            performance_allowance: data.performance_allowance.clone(),
+                            activity: data.activity.clone(),
+                            schedule_id: db_schdle.id.unwrap(),
+                        });
+                    }
+                    LocationTypes::Terminating(data) => {
+                        locations.push(ScheduleLocation {
+                            id: None,
+                            location: data.location.clone(),
+                            scheduled_departure_time: None,
+                            scheduled_arrival_time: Some(data.scheduled_arrival_time.clone()),
+                            scheduled_pass_time: None,
+                            public_departure_time: None,
+                            public_arrival_time: Some(data.public_arrival_time.clone()),
+                            platform: data.platform.clone(),
+                            line: None,
+                            engineering_allowance: None,
+                            pathing_allowance: None,
+                            performance_allowance: None,
+                            activity: Some(data.activity.clone()),
+                            schedule_id: db_schdle.id.unwrap(),
+                        });
+                    }
+                };
+            }
+            ScheduleLocation::insert_bulk(pool, &locations).await?;
+        }
+    }
     info!("Finished updating the schedule!");
     Ok(())
+}
+
+fn parse_line(line: &str, locations: &HashMap<String, String>) -> CIFRowTypes {
+    if line != "" {
+        match &line[0..2] {
+            "HD" => match from_bytes::<CIFHeader>(line.as_bytes()).ok() {
+                Some(data) => {
+                    return CIFRowTypes::Header(data);
+                }
+                None => {
+                    error!("Error parsing HD record (raw: {line})");
+                    return CIFRowTypes::Unknown;
+                }
+            },
+            "BS" => match from_bytes::<CIFBasicSchedule>(line.as_bytes()).ok() {
+                Some(data) => {
+                    return CIFRowTypes::BasicSchedule(data);
+                }
+                None => {
+                    error!("Error parsing BS record (raw: {line})");
+                    return CIFRowTypes::Unknown;
+                }
+            },
+            "BX" => match from_bytes::<CIFBasicScheduleExtended>(line.as_bytes()).ok() {
+                Some(data) => {
+                    return CIFRowTypes::BasicScheduleExtended(data);
+                }
+                None => {
+                    error!("Error parsing BX record (raw: {line})");
+                    return CIFRowTypes::Unknown;
+                }
+            },
+            "LO" => match from_bytes::<CIFOriginLocation>(line.as_bytes()).ok() {
+                Some(mut data) => {
+                    let location = data
+                        .location
+                        .trim()
+                        .chars()
+                        .take(7)
+                        .collect::<String>()
+                        .trim()
+                        .to_string(); // Strip away the suffix from the location
+
+                    let uic = locations
+                        .get(&location)
+                        .expect(format!("tiploc {location} should exist").as_str())
+                        .clone();
+
+                    data.location = uic;
+                    return CIFRowTypes::OriginLocation(data);
+                }
+                None => {
+                    error!("Error parsing LO record (raw: {line})");
+                    return CIFRowTypes::Unknown;
+                }
+            },
+            "LI" => match from_bytes::<CIFIntermediateLocation>(line.as_bytes()).ok() {
+                Some(mut data) => {
+                    let location = data
+                        .location
+                        .trim()
+                        .chars()
+                        .take(7)
+                        .collect::<String>()
+                        .trim()
+                        .to_string(); // Strip away the suffix from the location
+
+                    let uic = locations
+                        .get(&location)
+                        .expect(format!("tiploc {location} should exist").as_str())
+                        .clone();
+
+                    data.location = uic;
+                    return CIFRowTypes::IntermediateLocation(data);
+                }
+                None => {
+                    error!("Error parsing LI record (raw: {line})");
+                    return CIFRowTypes::Unknown;
+                }
+            },
+            "LT" => {
+                match from_bytes::<CIFTerminatingLocation>(line.as_bytes()).ok() {
+                    Some(mut data) => {
+                        let location = data
+                            .location
+                            .trim()
+                            .chars()
+                            .take(7)
+                            .collect::<String>()
+                            .trim()
+                            .to_string(); // Strip away the suffix from the location
+
+                        let uic = locations
+                            .get(&location)
+                            .expect(format!("tiploc {location} should exist").as_str())
+                            .clone();
+
+                        data.location = uic;
+                        return CIFRowTypes::TerminatingLocation(data);
+                    }
+                    None => {
+                        error!("Error parsing LT record (raw: {line})");
+                        return CIFRowTypes::Unknown;
+                    }
+                }
+            }
+            _ => {
+                return CIFRowTypes::Unknown;
+            }
+        }
+    }
+    return CIFRowTypes::Unknown;
 }
 
 #[derive(Debug, Deserialize, FixedWidth)]
@@ -364,7 +622,7 @@ struct CIFBasicScheduleExtended {
     performance_monitoring: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct StructuredSchedule {
     uid: String,
     identity: Option<String>,
@@ -451,4 +709,20 @@ struct CIFTerminatingLocation {
     path: Option<String>,
     #[fixed_width(range = "24..36")]
     activity: String,
+}
+
+#[derive(Clone)]
+struct MetaSchedule {
+    schdle: Option<StructuredSchedule>,
+    locs: Vec<LocationTypes>,
+}
+
+enum CIFRowTypes {
+    Header(CIFHeader),
+    BasicSchedule(CIFBasicSchedule),
+    BasicScheduleExtended(CIFBasicScheduleExtended),
+    OriginLocation(CIFOriginLocation),
+    IntermediateLocation(CIFIntermediateLocation),
+    TerminatingLocation(CIFTerminatingLocation),
+    Unknown,
 }

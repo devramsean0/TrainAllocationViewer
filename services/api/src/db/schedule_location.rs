@@ -71,4 +71,67 @@ impl ScheduleLocation {
         debug!("Inserted Schedule Location with ID: {:?}", row.id);
         Ok(())
     }
+
+    pub async fn insert_bulk(
+        pool: &sqlx::postgres::PgPool,
+        locs: &[ScheduleLocation],
+    ) -> Result<(), sqlx::Error> {
+        if locs.is_empty() {
+            return Ok(());
+        }
+
+        let mut builder = sqlx::QueryBuilder::new(
+            "INSERT INTO schedule_locations (
+                    location,
+                    scheduled_departure_time,
+                    scheduled_arrival_time,
+                    scheduled_pass_time,
+                    public_departure_time,
+                    public_arrival_time,
+                    platform,
+                    line,
+                    engineering_allowance,
+                    pathing_allowance,
+                    performance_allowance,
+                    activity,
+                    schedule_id
+                )",
+        );
+
+        builder.push_values(locs, |mut b, loc| {
+            b.push_bind(&loc.location);
+            b.push_bind(&loc.scheduled_departure_time);
+            b.push_bind(&loc.scheduled_arrival_time);
+            b.push_bind(&loc.scheduled_pass_time);
+            b.push_bind(&loc.public_departure_time);
+            b.push_bind(&loc.public_arrival_time);
+            b.push_bind(&loc.platform);
+            b.push_bind(&loc.line);
+            b.push_bind(&loc.engineering_allowance);
+            b.push_bind(&loc.pathing_allowance);
+            b.push_bind(&loc.performance_allowance);
+            b.push_bind(&loc.activity);
+            b.push_bind(&loc.schedule_id);
+        });
+
+        builder
+            .push("ON CONFLICT (schedule_id, location) DO UPDATE SET")
+            .push("location = EXCLUDED.location,")
+            .push("scheduled_departure_time = EXCLUDED.scheduled_departure_time,")
+            .push("scheduled_arrival_time = EXCLUDED.scheduled_arrival_time,")
+            .push("scheduled_pass_time = EXCLUDED.scheduled_pass_time,")
+            .push("public_departure_time = EXCLUDED.public_departure_time,")
+            .push("public_arrival_time = EXCLUDED.public_arrival_time,")
+            .push("platform = EXCLUDED.platform,")
+            .push("line = EXCLUDED.line,")
+            .push("engineering_allowance = EXCLUDED.engineering_allowance,")
+            .push("pathing_allowance = EXCLUDED.pathing_allowance,")
+            .push("performance_allowance = EXCLUDED.performance_allowance,")
+            .push("activity = EXCLUDED.activity,")
+            .push("schedule_id = EXCLUDED.schedule_id");
+
+        let result = builder.build().execute(pool).await?;
+        debug!("Bulk upsert affected {} rows", result.rows_affected());
+        Ok(())
+    }
 }
